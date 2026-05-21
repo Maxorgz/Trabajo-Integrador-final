@@ -1,0 +1,22 @@
+{
+  "name": "trabajo-integrador-final",
+  "version": "1.0.0",
+  "description": "Proyecto Final Integrador",
+  "homepage": "https://github.com/Maxorgz/Proyecto-Final-Web-2#readme",
+  "bugs": {
+    "url": "https://github.com/Maxorgz/Proyecto-Final-Web-2/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Maxorgz/Proyecto-Final-Web-2.git"
+  },
+  "license": "ISC",
+  "author": "Maxy",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
