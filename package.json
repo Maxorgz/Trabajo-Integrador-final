@@ -1,6 +1,7 @@
 {
   "name": "trabajo-integrador-final",
   "version": "1.0.0",
+  
   "description": "Proyecto Final Integrador",
   "homepage": "https://github.com/Maxorgz/Proyecto-Final-Web-2#readme",
   "bugs": {
@@ -12,11 +13,16 @@
   },
   "license": "ISC",
   "author": "Maxy",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "pug": "3.0.4"
   }
 }
