@@ -1,0 +1,47 @@
+extends layout
+
+block content
+
+    div.m-1.row
+
+        div.col-lg-7.col-md-6.col-sm-5.col-xs-12.my-5
+            h1#fotaza.col-lg-12.col-md-12.col-sm-12.col-xs-12.mx-4 Fotaza
+            h1#prueba.col-lg-12.col-md-12.col-sm-12.col-xs-12.mx-4.my-2 Imágenes que cuentan
+            h4#encabezado.col-lg-6.col-md-12.col-sm-10.col-xs-12.d-none.d-sm-block.mx-4.my-0 Descubre, comparte y compra las mejores fotos en Fotaza. Únete a nuestra comunidad de fotógrafos hoy mismo. ¡Regístrate ahora!
+
+            div.col-lg-12.col-md-12.col-sm-12.col-xs-12.mx-4.my-5
+                button.cssbuttons-io-button(type="button") Empieza Hoy!
+                    div.icon
+                        a(href="unauthenticated/fotaza")
+                            svg(height="24" width="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
+                                path(d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2" fill="currentColor")
+
+        div.col-lg-5.col-md-6.col-sm-7.col-xs-12.my-4
+            div.login-box.col-lg-11.col-md-12.col-sm-12.col-xs-12.my-3
+                h2 Registrate
+                form(action="auth/register" method="post" enctype="multipart/form-data")
+                    div.user-box
+                        input(type="text" name="name" required)
+                        label Nombre
+                    div.user-box
+                        input(type="text" name="surname" required)
+                        label Apellido
+                    div.user-box
+                        input(type="email" name="mail" required)
+                        label Mail
+                    div.user-box
+                        input(type="password" name="password" required)
+                        label Contraseña
+                    div.user-box
+                        input(type="text" name="interests" required)
+                        label Intereses
+                    div.user-box
+                        input(type="file" name="imagen" accept="image/jpeg,image/jpg,image/png")
+                        label Foto de perfil
+                    div#politica
+                        label Condiciones de uso
+                    div.user-box.d-flex
+                        input(type="checkbox" name="politica" required id="checkbox")
+                        p.condiciones acepto las condiciones
+
+                    button#submit-login(type="submit") ENVIAR
