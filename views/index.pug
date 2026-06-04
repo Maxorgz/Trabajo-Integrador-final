@@ -3,8 +3,14 @@ extends layout.pug
 block metadata
     title Home - Fotaza
 block content
-    h1 Bienvenido a mi sitio web
-    p Este es el contenido de la página de inicio.
-    p <a href="/login">Iniciar Sesión</a>
-    p <a href="/register">Registrarse</a>
+
+    h1.text-3xl.font-bold.text-white.text-center Bienvenido a mi sitio web
+    p.text-100xl.text-gray-300
+      | Bienvenido a Fotaza. Sube, comparte y explora las mejores galerías en alta resolución. Tu próxima gran foto está aquí.
+    
+    div(class="flex flex-col gap-2")
+     p(href="/login" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+       a(href="/login") Iniciar Sesión
+     p(href="/register" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+       a(href="/register") Registrarse
 
