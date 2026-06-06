@@ -11,7 +11,7 @@ User.init(
       autoIncrement: true,
     },
 
-    firstName: {
+    nombre_usuario: {
       type: DataTypes.STRING(50),
       allowNull: false,
     },
@@ -29,12 +29,24 @@ User.init(
     password: {
       type: DataTypes.STRING(100),
       allowNull: false,
+    },
+
+    rol: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'usuario'
+    },
+
+    estado: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'activo'
     }
+
   },
   {
     
     sequelize, 
-    modelName: 'User',
+    modelName: 'usuario',
+    timestamps: 'false',
     createdAt: 'true',
     deletedAt: 'true',
   },
