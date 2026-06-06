@@ -1,9 +1,9 @@
 import sequelize from '../models/config.js';
 import { Model, DataTypes } from 'sequelize';
 
-export class User extends Model {}
+export class Denuncia extends Model {}
 
-User.init(
+Denuncia.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -11,31 +11,30 @@ User.init(
       autoIncrement: true,
     },
 
-    firstName: {
-      type: DataTypes.STRING(50),
+    tipo_denuncia: {
+      type: DataTypes.STRING(30),
+      allowNull: false,
+    },
+    
+    usuario_denunciante: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
-    lastName: {
-      type: DataTypes.STRING(50),
-      
-    },
-    email: {
+    motivo: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true,
     },
 
-    password: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    }
+    estado: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'pendente',
+     },
+
   },
   {
-    
     sequelize, 
-    modelName: 'User',
-    createdAt: 'true',
-    deletedAt: 'true',
+    modelName: 'denuncias',
+    timestamps:'false',
   },
 );
