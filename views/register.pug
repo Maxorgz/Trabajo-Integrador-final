@@ -31,10 +31,10 @@ block content
                 h2 Registrate
                 form(action="/auth/register" method="post" )
                     div.user-box
-                        input(type="text" name="firstName" required)
+                        input(type="text" name="nombre_usuario" required)
                         label Nombre
                     div.user-box
-                        input(type="text" name="lastName" required)
+                        input(type="text" name="apellido_usuario" required)
                         label Apellido
                     div.user-box
                         input(type="email" name="email" required)
@@ -42,5 +42,7 @@ block content
                     div.user-box
                         input(type="password" name="password" required)
                         label Contraseña
+                    div#contain-login-register.my-5
+                         a#login-register.text-gray-400(href="/login") ¿Ya tienes una cuenta? Inicia Sesion   
 
                     button#submit-login(type="submit") ENVIAR

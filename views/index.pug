@@ -2,6 +2,7 @@
 extends layout.pug
 block metadata
     title Home - Fotaza
+    script(src="https://cdn.tailwindcss.com")
 block content
 
     h1.text-3xl.font-bold.text-white.text-center Bienvenido a mi sitio web
@@ -9,8 +10,58 @@ block content
       | Bienvenido a Fotaza. Sube, comparte y explora las mejores galerías en alta resolución. Tu próxima gran foto está aquí.
     
     div(class="flex flex-col gap-2")
-     p(href="/login" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+     p(class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
        a(href="/login") Iniciar Sesión
      p(href="/register" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
        a(href="/register") Registrarse
+     
+     p(href="/nuevaFoto" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+        a(href="/nuevaFoto") Subir Foto
+     
+     p(href="/login" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+        a(href="/logout") Cerrar Sesion
 
+     div.contenedor-principal
+        aside.sidebar
+          h3 Categorias
+          ul
+            li
+              //- Quitamos los ?. de esta línea
+              a(href=`/?orden=${filtrosActuales.orden || ''}` class=(!filtrosActuales.categoriaSeleccionada ? "activo" : "")) Ver Todas
+            
+            if etiquetasSidebar && etiquetasSidebar.length > 0
+              each tag in etiquetasSidebar
+                li
+                  //- Quitamos los ?. de esta línea también
+                  a(href=`/?categoria=${tag.nombre}&orden=${filtrosActuales.orden || ''}` class=(filtrosActuales.categoriaSeleccionada === tag.nombre ? "activo" : ""))= tag.nombre
+    
+          h3 Ordenar por
+          ul
+            li
+              //- Y de los filtros de ordenamiento
+              a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=recientes` class=(!filtrosActuales.orden || filtrosActuales.orden !== 'antiguas' ? "activo" : "")) Más recientes
+            li
+              a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=antiguas` class=(filtrosActuales.orden === 'antiguas' ? "activo" : "")) Más antiguas
+         
+               main.galeria-contenedor
+                 if fotos && fotos.length > 0
+                   each foto in fotos
+                     a.tarjeta-foto(href=`/foto/${foto.id}`)
+                       div.contenedor-imagen
+                         if foto.imagenes && foto.imagenes.length > 0
+                           img(src=foto.imagenes[0].url_imagen alt=foto.titulo)
+                         else
+                           div(style="width: 100%; height: 100%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999;") Sin imagen
+
+                       div.info-foto
+                         h4(style="margin: 0 0 5px 0;")= foto.titulo
+
+                         //- ✅ CORRECCIÓN 2: Usar nombre_us (así está en tu base de datos) y el signo ? por si acaso
+                         p(style="margin: 0; color: #666; font-size: 0.9em;") Por: #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
+                         if foto.etiquetas
+                           each etiqueta in foto.etiquetas
+                             span.etiqueta-pill= etiqueta.nombre
+                 else
+                   div(style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #999;")
+                     h2 No hay resultados
+                     p No se encontraron fotos con los filtros seleccionados.
