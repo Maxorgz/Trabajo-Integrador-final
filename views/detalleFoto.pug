@@ -1,0 +1,152 @@
+extends layout
+
+block metadata
+    title detalle de fotos 
+
+block content
+    div.contenedor-detalle
+    if !usuario
+      div.aviso-invitado
+        p Estas viendo esto como invitado. Inicia sesion para dar like, comentar o ver otras opciones
+    
+    div.info-seccion
+      p Publicado por: #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
+
+      div.carrusel-contenedor
+        if foto.imagenes && foto.imagenes.length > 0
+          if foto.imagenes.length > 1
+            button.carrusel-btn.prev(onclick="cambiarImagen(-1)") &#10094;
+            button.carrusel-btn.next(onclick="cambiarImagen(1)") &#10095;
+          each imagen, index in foto.imagenes
+            div.carrusel-slide(class=(index === 0 ? "activo" : ""))
+              img.imagen-grande(src=imagen.url_imagen alt=foto.titulo)
+              if imagen.marca_agua
+                img.marca-agua(src="/images/watermark_logo.png" alt="Copyright")
+        else
+          p(style="color: #999;") No hay imagenes disponibles.
+      
+      if foto.etiquetas && foto.etiquetas.length > 0
+        div(style="margin-bottom: 20px;")
+          each etiqueta in foto.etiquetas
+            span.etiqueta-pill= etiqueta.nombre
+
+      if foto.descripcion
+        p(style="margin-top: 10px;")= foto.descripcion
+
+      p(style="color: #666; font-size: 0.85em;") Publicado el: #{new Date(foto.fecha_publicacion).toLocaleString('es-AR', { hour12: false})}
+
+      div(style="margin-top: 10px; background: #faf4ed; padding: 10px; border-radius: 5px; display: inline-block;")
+        span(style="margin-right: 15px; font-weight: bold; color: #8a5a44;")  #{totalLikes} Me gusta
+        span(style="font-weight: bold; color: #8a5a44;") Promedio: #{promedio} 
+        span(style="color: #666; font-size: 0.9em;") (#{totalVotosPuntaje} valoraciones)
+
+
+      div.acciones(style="margin-top: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;")
+        if usuario
+          if usuario && usuario.id !== foto.usuario_id
+            form(action=`/publicacion/${foto.id}/like` method="POST" style="display: inline-block;")
+              button.btn-accion(type="submit") Me gusta
+            form(action=`/publicacion/${foto.id}/valorar` method="POST" style="display: flex; gap: 5px;")
+              select(name="puntaje" required style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;")
+                option(value="" disabled selected) Calificar...
+                option(value="5") 5 ⭐
+                option(value="4") 4 ⭐
+                option(value="3") 3 ⭐
+                option(value="2") 2 ⭐
+                option(value="1") 1 ⭐
+              button.btn-accion(type="submit") Enviar Voto
+            form(action=`/publicacion/${foto.id}/me-interesa` method="POST" style="display: inline-block;")
+              button.btn-accion(type="submit" style="background-color: #28a745; color: white; border: none;") Me interesa
+            
+          else  
+            button.btn-accion(disabled style="opacity: 0.5; cursor: not-allowed;") Me gusta
+            div(style="display: flex; gap: 5px;")
+              select(disabled style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; opacity: 0.5; cursor: not-allowed;")
+                option(value="" disabled selected) Calificar...
+            button.btn-accion(disabled style="background-color: #28a745; color: white; border: none; opacity: 0.5; cursor: not-allowed;") Me interesa
+          
+          if usuario && usuario.id === foto.usuario_id
+            a.btn-accion(href=`/publicacion/${foto.id}/editar` style="background-color: #f39c12; color: white; border: none; text-decoration: none;") Editar
+      
+      if usuario
+        div(style="margin-top: 25px; padding: 15px; background: #faf4ed; border-radius: 8px; border: 1px solid #eee;")
+          if misColecciones && misColecciones.length > 0
+            form(action="/colecciones/guardar" method="POST" style="display: flex; gap: 10px; align-items: center; margin: 0;")
+              input(type="hidden" name="publicacion_id" value=foto.id)
+              label(for="coleccion_id" style="color: #8a5a44; font-weight: bold;") Guardar en Coleccion:
+              select(name="coleccion_id" required style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; flex: 1;")
+                option(value="" disabled selected) Selecciona una carpeta...
+                each col in misColecciones
+                  option(value=col.id)= col.nombre
+              button(type="submit" style="background: #8a5a44; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;") Guardar Foto
+          else
+            div(style="display: flex; justify-content: space-between; align-items: center;")
+              p(style="color: #666; margin: 0;") 📁 Aún no tienes colecciones creadas.
+              a(href="/colecciones" style="background: #8a5a44; color: white; text-decoration: none; padding: 6px 12px; border-radius: 5px; font-size: 0.9em;") Crear Colección
+    
+    div.acciones-secundarias(style="margin-top: 20px; text-align: right;")
+        if usuario
+          form(action=`/publicacion/${foto.id}/denunciar` method="POST" style="display: inline-block;")
+            select(name="motivo" required style="padding: 5px; border-radius: 5px;")
+              option(value="" disabled selected) Motivo de denuncia...
+              option(value="Spam") Spam
+              option(value="Contenido Inapropiado") Contenido Inapropiado
+              option(value="Derechos de Autor") Derechos de Autor
+            textarea(name="justificacion" required placeholder="Justifica tu denuncia detalladamente..." rows="2" style="width: 250px; padding: 5px; border-radius: 5px; border: 1px solid #ccc;")
+            button(type="submit" style="background: #cc0000; color: white; border: none; padding: 6px 10px; border-radius: 5px; margin-left: 5px; cursor: pointer;")  Denunciar
+
+    div.comentarios-seccion(style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;")
+        h3(style="color: #8a5a44;") Comentarios
+
+        if foto.comentarios && foto.comentarios.length > 0
+          each comentario in foto.comentarios
+            div.comentario(style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);")
+              
+              div(style="display: flex; justify-content: space-between; align-items: center;")
+                strong(style="color: #8a5a44;")= comentario.Usuario.nombre_usuario
+                
+                span(style="color: #999; font-size: 0.8em;") #{new Date(comentario.createdAt).toLocaleString('es-AR', { hour12: false})}
+              
+              p(style="margin: 8px 0 0 0; color: #333;")= comentario.texto
+              if usuario && usuario.id !== comentario.usuario_id
+                details(style="margin-top: 10px;")
+                  summary(style="color: #cc0000; font-size: 0.85em; cursor: pointer; user-select: none;") Denunciar comentario
+                  form(action=`/comentario/${comentario.id}/denunciar` method="POST" style="margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #fdf5f5; padding: 10px; border-radius: 5px;")
+                    select(name="motivo" required style="padding: 5px; border-radius: 5px;")
+                      option(value="" disabled selected) Motivo...
+                      option(value="Lenguaje Ofensivo") Lenguaje Ofensivo
+                      option(value="Spam") Spam 
+                      option(value="Acoso") Acoso
+                    textarea(name="justificacion" required placeholder="Justifica tu denuncia..." rows="2" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;")
+                    button(type="submit" style="background: #cc0000; color: white; border: none; padding: 5px; border-radius: 5px; cursor: pointer;") Enviar Denuncia
+        else
+          p(style="color: #666;") Aun no hay comentarios.
+        if usuario
+          form(action=`/publicacion/${foto.id}/comentar` method="POST" style="margin-top: 20px;")
+            textarea(name="texto" required placeholder="Escribe un comentario..." rows="3" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px;")
+            button.btn-oscuro(type="submit" style="padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;") Publicar Comentario
+        else
+          button.btn-accion(disabled style="opacity: 0.5; cursor: not-allowed;") Publicar Comentario
+
+
+block scripts  
+  script.
+      let slideIndex = 0;
+
+      function cambiarImagen(direccion) {
+        const slides = document.querySelectorAll('.carrusel-slide');
+        
+        if (slides.length === 0) return;
+
+        slides[slideIndex].classList.remove('activo');
+        
+        slideIndex += direccion;
+        
+        if (slideIndex >= slides.length) {
+          slideIndex = 0;
+        } else if (slideIndex < 0) {
+          slideIndex = slides.length - 1;
+        }
+        
+        slides[slideIndex].classList.add('activo');
+      }

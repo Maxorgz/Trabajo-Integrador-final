@@ -33,8 +33,8 @@ block content
         h2(class="my-4 text-white text-2xl font-semibold") Iniciar sesión
 
         form(action="/auth/login" method="post")
-          div.user-box.my-5
-            input(type="email" name="email" required)
+          div.user-box.my-4
+            input#email(type="email" name="email" required class="w-full bg-transparent border-b border-gray-600 text-white outline-none focus:border-cyan-400 py-1 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:ease-in-out [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]")
             label Mail  
 
           div.user-box.my-4

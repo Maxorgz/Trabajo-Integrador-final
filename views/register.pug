@@ -31,13 +31,13 @@ block content
                 h2 Registrate
                 form(action="/auth/register" method="post" )
                     div.user-box
-                        input(type="text" name="nombre_usuario" required)
+                        input#nombre(type="text" name="nombre_usuario" required class="w-full bg-transparent border-b border-gray-600 text-white outline-none focus:border-cyan-400 py-1 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:ease-in-out [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]")
                         label Nombre
                     div.user-box
-                        input(type="text" name="apellido_usuario" required)
+                        input#apellido(type="text" name="apellido_usuario" required class="w-full bg-transparent border-b border-gray-600 text-white outline-none focus:border-cyan-400 py-1 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:ease-in-out [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]")
                         label Apellido
                     div.user-box
-                        input(type="email" name="email" required)
+                        input#email(type="email" name="email" required class="w-full bg-transparent border-b border-gray-600 text-white outline-none focus:border-cyan-400 py-1 [&:-webkit-autofill]:transition-colors [&:-webkit-autofill]:duration-[5000s] [&:-webkit-autofill]:ease-in-out [&:-webkit-autofill]:[-webkit-text-fill-color:#fff]")
                         label Mail
                     div.user-box
                         input(type="password" name="password" required)
