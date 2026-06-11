@@ -1,4 +1,4 @@
-import sequelize from '../models/config.js';
+import sequelize from '../config/db.js';
 import { Model, DataTypes } from 'sequelize';
 
 export class Publicacion extends Model {}
@@ -39,7 +39,8 @@ Publicacion.init(
   },
   {
     sequelize, 
-    modelName: 'publicacion',
+    modelName: 'publicaciones',
     timestamps:'false',
   },
 );
+export default Publicacion;

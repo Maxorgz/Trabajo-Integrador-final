@@ -1,4 +1,4 @@
-import sequelize from '../models/config.js';
+import sequelize from '../config/db.js';
 import { Model, DataTypes } from 'sequelize';
 
 export class Imagen extends Model {}
@@ -39,3 +39,5 @@ Imagen.init(
     timestamps:'true',
   },
 );
+
+export default Imagen;

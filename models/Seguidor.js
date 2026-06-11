@@ -1,33 +1,33 @@
 import sequelize from '../config/db.js';
 import { Model, DataTypes } from 'sequelize';
 
-export class Comentarios extends Model {}
+export class Seguidor extends Model {}
 
-Comentarios.init(
+Seguidor.init(
   {
-    id: {
+    usuario_seguido_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
 
 
-    imagen_id: {
+    usuario_seguidor_id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       allowNull: false,  
     },
 
-    texto: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+    fecha_seguimiento: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
    
   },
   {
     sequelize, 
-    modelName: 'comentarios',
+    modelName: 'seguidores',
     timestamps:'false',
   },
 );
-
-export default Comentarios;
+export default Seguidor;
