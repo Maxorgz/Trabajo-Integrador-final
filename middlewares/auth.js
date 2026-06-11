@@ -1,33 +1,14 @@
-import { User } from "../models/User.js";
-
-export async function authMiddleware(req, res, next) {
-  const user = req.session.user; // usuario de la sesion solo contiene id
-  if(!user) {
-    res.redirect('/auth/login');
-    return;
-  }
-
-  const userId = Number(user.id);
-
-  try {
-    const user = await User.findByPk(userId, {
-      attributes: ['id', 'firstName', 'lastName'],
-    });
-
-    if (!user) {
-      res.redirect('/auth/login');
-      return;
+export const estaLogueado = (req, res, next) => {
+    if (req.session && req.session.usuario) {
+        return next();
     }
+    res.redirect('/auth/login');
+};
 
-    req.user = user;
-
-    res.locals.currentUser = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-    };
-  } catch (error) {
-    console.error('[!] Error al autenticar usuario:', error);
-  }
-
-  next();
-}
+export const esValidador = (req, res, next) => {
+    if (req.session && req.session.usuario && 
+       (req.session.usuario.rol === 'validador' || req.session.usuario.rol === 'admin')) {
+        return next();
+    }
+    res.redirect('/');
+};

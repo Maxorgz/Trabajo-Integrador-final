@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs';
 import { Usuario } from '../models/index.js';
 
 export const registrarUsuario = async (req, res) => {
@@ -6,43 +5,59 @@ export const registrarUsuario = async (req, res) => {
         const { nombre_usuario, email, password } = req.body;
 
         if (!email || !nombre_usuario || !password) {
-            return res.render('registro', { 
-                mensajeAlerta: { status: 'error', text: 'Todos los campos son obligatorios' } 
+            return res.render('register', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'Todos los campos son obligatorios'
+                }
             });
         }
 
         if (password.length < 6) {
-            return res.render('registro', { 
-                mensajeAlerta: { status: 'error', text: 'La contrasenia debe tener al menos 6 caracteres' } 
+            return res.render('register', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'La contraseña debe tener al menos 6 caracteres'
+                }
             });
         }
 
-        const usuarioExistente = await Usuario.findOne({ where: { email: email } });
+        const usuarioExistente = await Usuario.findOne({
+            where: { email }
+        });
+
         if (usuarioExistente) {
-            return res.render('registro', { 
-                mensajeAlerta: { status: 'error', text: 'Ese correo ya esta registrado. Intenta iniciar sesion.' } 
+            return res.render('register', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'Ese correo ya está registrado. Intenta iniciar sesión.'
+                }
             });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const contraseniaHasheada = await bcrypt.hash(password, salt);
-
-        const nuevoUsuario = await Usuario.create({
-            nombre_usuario: nombre_usuario,
-            email: email,
-            password: contraseniaHasheada, 
+        await Usuario.create({
+            nombre_usuario,
+            email,
+            password,
             rol: 'usuario',
             estado: 'activo'
         });
 
-        return res.render('registro', { 
-                mensajeAlerta: { status: 'success', text: 'Usuario registrado con exito' } 
-            });
+        return res.render('register', {
+            mensajeAlerta: {
+                status: 'success',
+                text: 'Usuario registrado con éxito'
+            }
+        });
 
     } catch (error) {
-        console.error('Error al registrar el usuario, ', error);
-        res.render('registro', { 
-            mensajeAlerta: { status: 'error', text: 'Hubo un problema al crear la cuenta' } 
+        console.error('Error al registrar usuario:', error);
+
+        return res.render('register', {
+            mensajeAlerta: {
+                status: 'error',
+                text: 'Hubo un problema al crear la cuenta'
+            }
         });
     }
 };
@@ -52,52 +67,81 @@ export const iniciarSesion = async (req, res) => {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.render('login', { 
-                mensajeAlerta: { status: 'error', text: 'Por favor, ingresa tu correo y contrasenia' } 
+            return res.render('login', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'Por favor, ingresa tu correo y contraseña'
+                }
             });
         }
 
-        const usuario = await Usuario.findOne({ where: { email: email } });
-        
+        const usuario = await Usuario.findOne({
+            where: { email }
+        });
+
         if (!usuario) {
-            return res.render('login', { 
-                mensajeAlerta: { status: 'error', text: 'El usuario no existe' } 
+            return res.render('login', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'El usuario no existe'
+                }
             });
         }
 
-        const contraseniaValida = await bcrypt.compare(password, usuario.password);
-        
+        const contraseniaValida = password === usuario.password;
+
         if (!contraseniaValida) {
-            return res.render('login', { 
-                mensajeAlerta: { status: 'error', text: 'Contasenia incorrecta' } 
+            return res.render('login', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'Contraseña incorrecta'
+                }
             });
         }
 
         req.session.usuario = {
             id: usuario.id,
-            nombre: usuario.nombre_usuario,
+            nombre_usuario: usuario.nombre_usuario,
             rol: usuario.rol
         };
 
-        return res.redirect('/');
+        console.log('USUARIO EN SESION:', req.session.usuario);
+
+        req.session.save((err) => {
+            if (err) {
+                console.error('Error al guardar sesión:', err);
+
+                return res.render('login', {
+                    mensajeAlerta: {
+                        status: 'error',
+                        text: 'Error al iniciar sesión'
+                    }
+                });
+            }
+
+            return res.redirect('/');
+        });
 
     } catch (error) {
-        console.error('Error al iniciar sesion:', error);
-        return res.render('login', { 
-                mensajeAlerta: { status: 'error', text: 'Hubo un problema al procesar el login' } 
-            });
+        console.error('Error al iniciar sesión:', error);
+
+        return res.render('login', {
+            mensajeAlerta: {
+                status: 'error',
+                text: 'Error al iniciar sesión'
+            }
+        });
     }
 };
 
 export const cerrarSesion = (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-            console.error('Error al cerrar la sesion:', err);
+            console.error('Error al cerrar sesión:', err);
             return res.redirect('/');
         }
-        
+
         res.clearCookie('connect.sid');
-        
         return res.redirect('/');
     });
 };
