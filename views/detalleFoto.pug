@@ -141,11 +141,11 @@ block content
                       option(value="1") 1 Estrella ⭐
                     button(type="submit" class="px-5 py-3 bg-amber-500/20 hover:bg-amber-500 backdrop-blur-md text-amber-400 hover:text-white border border-amber-500/50 font-semibold rounded-xl transition-all shadow-lg") Votar
                   
-                  form(action=`/publicacion/${foto.id}/me-interesa` method="POST" class="m-0")
-                    button(type="submit" class="w-full flex items-center justify-center gap-2 py-3 bg-green-500/20 hover:bg-green-500 backdrop-blur-md border border-green-500/50 hover:border-green-400 text-green-400 hover:text-white font-semibold rounded-xl transition-all shadow-lg")
+                    //form(action=`/publicacion/${foto.id}/me-interesa` method="POST" class="m-0")
+                      button(type="submit" class="w-full flex items-center justify-center gap-2 py-3 bg-green-500/20 hover:bg-green-500 backdrop-blur-md border border-green-500/50 hover:border-green-400 text-green-400 hover:text-white font-semibold rounded-xl transition-all shadow-lg")
                       | 📌 Me interesa
               
-                else 
+                //else 
                   a(href=`/publicacion/${foto.id}/editar` class="w-full flex justify-center py-3 bg-[#f39c12]/20 hover:bg-[#f39c12] backdrop-blur-md border border-[#f39c12]/50 text-[#f39c12] hover:text-white font-bold rounded-xl transition-all no-underline tracking-wide shadow-lg") ✏️ Editar Publicación
               
               else

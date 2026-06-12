@@ -29,6 +29,10 @@ block content
             path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
 
         h3(class="text-3xl font-bold text-white mb-8") Regístrate
+       
+         if mensajeAlerta
+           div(class=`p-4 mb-6 rounded-xl border ${mensajeAlerta.status === 'success' ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400'}`)
+             p(class="m-0 text-sm font-semibold text-center")= mensajeAlerta.text
         
         form(action="/auth/register" method="POST" class="flex flex-col gap-5")
           

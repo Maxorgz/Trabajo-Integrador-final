@@ -64,6 +64,6 @@ block content
               div(class="w-20 h-20 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 group-hover:from-cyan-600 group-hover:to-blue-700 flex items-center justify-center text-white font-bold text-3xl shadow-inner mb-4 transition-colors duration-500")
                 | #{persona.nombre_usuario.charAt(0).toUpperCase()}
               
-              h3(class="text-lg font-bold text-gray-200 m-0 mb-4 truncate w-full")= persona.nombre_usuario
+              h3(class="text-lg font-bold text-gray-200 m-0 mb-4 truncate w-full") #{persona.nombre_usuario} #{persona.apellido_usuario || ''}
               
               a(href=`/perfil/${persona.id}` class="w-full block text-center py-2.5 bg-gray-800 hover:bg-cyan-900/40 text-cyan-400 hover:text-white text-sm font-semibold rounded-xl border border-gray-700 hover:border-cyan-500 transition-all duration-300 no-underline shadow-sm") Ver Perfil

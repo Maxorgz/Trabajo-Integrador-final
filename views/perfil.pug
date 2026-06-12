@@ -9,7 +9,7 @@ block content
       if esMiPerfil
         h2(class="text-white text-3xl font-bold m-0") Mi Perfil
       else
-        h2(class="text-white text-3xl font-bold m-0") Perfil de #{dueñoPerfil.nombre_usuario}
+        h2(class="text-white text-3xl font-bold m-0") Perfil de #{dueñoPerfil.nombre_usuario + " " + dueñoPerfil.apellido_usuario}
         
         if usuario
           form(action=`/perfil/${dueñoPerfil.id}/seguir` method="POST" class="mt-4")
@@ -47,7 +47,7 @@ block content
                     
               if esMiPerfil
                 div(class="flex justify-between items-center px-4 py-3 bg-gray-950 border-t border-gray-800 mt-auto")
-                  a(href=`/publicacion/${foto.id}/editar` class="text-cyan-500 text-sm font-bold hover:text-cyan-400 transition-colors no-underline") Editar
+                  //a(href=`/publicacion/${foto.id}/editar` class="text-cyan-500 text-sm font-bold hover:text-cyan-400 transition-colors no-underline") Editar
                   
                   form(action=`/publicacion/${foto.id}/eliminar` method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta foto para siempre?');" class="m-0")
                     button(type="submit" class="bg-transparent border-none text-red-500 text-sm font-bold cursor-pointer hover:text-red-400 transition-colors p-0") Eliminar

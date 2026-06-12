@@ -21,7 +21,7 @@ export const realizarBusqueda = async (req, res) => {
                         [Op.iLike]: `%${q}%` 
                     }
                 },
-                attributes: ['id', 'nombre_usuario'] 
+                attributes: ['id', 'nombre_usuario', 'apellido_usuario'] 
             });
         } 
         // publicacion
