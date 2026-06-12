@@ -11,6 +11,7 @@ import { esValidador } from '../middlewares/auth.js';
 import { mostrarPerfil } from '../controllers/publicacionController.js';
 import { alternarSeguir } from '../controllers/publicacionController.js';
 import { eliminarComentario } from '../controllers/publicacionController.js';
+import { eliminarPublicacion } from '../controllers/publicacionController.js';
 import { mostrarFeedSeguidos } from '../controllers/publicacionController.js';
 import { realizarBusqueda } from '../controllers/busquedaController.js';
 
@@ -30,6 +31,7 @@ router.post('/comentario/:id_comentario/eliminar', estaLogueado, eliminarComenta
 router.get('/buscar', realizarBusqueda);
 router.post('/perfil/:id/seguir', estaLogueado, alternarSeguir);
 router.get('/feed', estaLogueado, mostrarFeedSeguidos);
+router.post('/publicacion/:id/eliminar', eliminarPublicacion)
 
 
 export default router;

@@ -4,26 +4,43 @@ import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguid
 //home
 export const mostrarInicio = async (req, res) => {
     try {
-        const fotosEncontradas = await Publicacion.findAll({
+        const { categoria, orden } = req.query;
+        const orderOption = orden === 'antiguas' ? [['createdAt', 'ASC']] : [['createdAt', 'DESC']];
+        const includeEtiqueta = categoria 
+            ? { model: Etiqueta, as: 'etiquetas', where: { nombre: categoria }, required: true }
+            : { model: Etiqueta, as: 'etiquetas' };
+
+        const opcionesBusqueda = {
             include: [
                 { model: Imagen, as: 'imagenes' }, 
-                { model: Usuario },
-                { model: Etiqueta, as: 'etiquetas' }
+                { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] },
+                includeEtiqueta
             ],
-            order: [['createdAt', 'DESC']]
-        });
+            order: orderOption,
+            distinct: true 
+        };
 
+        if (categoria) {
+            opcionesBusqueda.subQuery = false;
+        }
+
+        const fotosEncontradas = await Publicacion.findAll(opcionesBusqueda);
         const etiquetas = await Etiqueta.findAll();
 
         res.render('index', {
+            usuario: req.session.usuario,
             fotos: fotosEncontradas,
-            filtrosActuales: {}, 
+            filtrosActuales: { 
+                categoriaSeleccionada: categoria, 
+                orden: orden 
+            }, 
             etiquetasSidebar: etiquetas 
         });
         
     } catch (error) {
         console.error("Error cargando la galería:", error);
         res.render('index', { 
+            usuario: req.session?.usuario || null,
             fotos: [], 
             filtrosActuales: {}, 
             etiquetasSidebar: [] 
@@ -230,6 +247,25 @@ export const crearPublicacion = async (req,res)=>{
         res.redirect(id_publicacion ? `/foto/${id_publicacion}` : '/'); 
     }
 };
+//------------------------------------------------------------------------------
+//EliminarPublicacion
+export const eliminarPublicacion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const usuarioId = req.session.usuario.id;
+        const publicacion = await Publicacion.findByPk(id);
+
+        if (publicacion && publicacion.usuario_id === usuarioId) {
+            await publicacion.destroy(); // Esto la borra para siempre de PostgreSQL
+        }
+        res.redirect(`/perfil/${usuarioId}`);
+
+    } catch (error) {
+        console.error("Error al intentar eliminar la publicación:", error);
+        res.redirect('/');
+    }
+};
+
 //----------------------------------------------------------------------
 //agregar comentario
 export const agregarComentario = async (req, res) => {

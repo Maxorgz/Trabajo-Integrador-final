@@ -3,7 +3,6 @@ extends layout
 block metadata
   title Detalle de fotos 
   style.
-    
     .carrusel-slide { opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in-out, visibility 0.5s; z-index: 0; }
     .carrusel-slide.activo { opacity: 1; visibility: visible; z-index: 10; }
 
@@ -11,13 +10,11 @@ block content
   
   div(class="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat bg-fixed py-6 sm:py-10 px-4 sm:px-6 lg:px-8")
     
-    
     div(class="absolute inset-0 bg-gray-900/85 z-0")
 
     //principal
     div(class="relative z-10 max-w-screen-2xl mx-auto")
 
-      
       if !usuario
         div#toast-invitado(class="fixed bottom-6 right-6 z-50 flex max-w-sm items-start gap-3 p-4 bg-white/10 backdrop-blur-xl border border-cyan-500/50 rounded-xl shadow-[0_10px_40px_-10px_rgba(6,182,212,0.3)] transition-all duration-500 hover:-translate-y-1")
           div(class="text-cyan-400 bg-cyan-900/50 p-2 rounded-full shrink-0")
@@ -31,10 +28,8 @@ block content
             svg(class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
 
-      
       div(class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-4")
         
-    
         div(class="lg:col-span-8 flex flex-col gap-6")
           
           //carrousel
@@ -88,19 +83,26 @@ block content
               div(class="text-center py-10")
                 p(class="text-gray-400 italic") Aún no hay comentarios. Sé el primero en opinar.
 
-       
+        
         div(class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-8")
           
-        
           div(class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 sm:p-8 shadow-2xl")
             
-            div(class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10")
-              div(class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#8a5a44] to-orange-400 flex items-center justify-center text-white font-bold text-xl shadow-lg")
-                | #{foto.Usuario ? foto.Usuario.nombre_usuario.charAt(0).toUpperCase() : '?'}
-              div
-                p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold mb-1") Publicado por
-                p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm") #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
-            
+            if foto.Usuario
+              a(href=`/perfil/${foto.usuario_id}` class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10 group no-underline block cursor-pointer")
+                div(class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#8a5a44] to-orange-400 flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform duration-300")
+                  | #{foto.Usuario.nombre_usuario.charAt(0).toUpperCase()}
+                div
+                  p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold mb-1 group-hover:text-cyan-400 transition-colors duration-300 m-0") Publicado por
+                  p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm group-hover:text-cyan-300 transition-colors duration-300 mt-1") #{foto.Usuario.nombre_usuario}
+            else
+              div(class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10")
+                div(class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-xl shadow-lg")
+                  | ?
+                div
+                  p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold mb-1 m-0") Publicado por
+                  p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm mt-1") Desconocido
+
             if foto.descripcion
               p(class="text-gray-200 leading-relaxed text-sm mb-6")= foto.descripcion
             
@@ -108,7 +110,6 @@ block content
               div(class="flex flex-wrap gap-2 mb-6")
                 each etiqueta in foto.etiquetas
                   span(class="bg-white/10 border border-white/20 hover:border-cyan-400 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-default shadow-sm") ##{etiqueta.nombre}
-            
             
             div(class="flex flex-col gap-3 bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 mb-6 shadow-inner")
               div(class="flex justify-between items-center")

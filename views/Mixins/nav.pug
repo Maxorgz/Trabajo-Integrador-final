@@ -14,7 +14,6 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
         
         div(class="flex items-center gap-6")
           a(href="/" class="text-gray-300 hover:text-cyan-400 text-sm font-medium transition-colors no-underline whitespace-nowrap") Inicio
-          a(href="/explorar" class="text-gray-300 hover:text-cyan-400 text-sm font-medium transition-colors no-underline whitespace-nowrap") Explorar
 
       div(class="flex-1 max-w-2xl min-w-[250px]")
         //form
@@ -40,8 +39,9 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
             | Nueva Foto
           
           div(class="flex items-center gap-3 pl-5 ml-2 border-l border-gray-700")
-            span(class="text-sm font-medium text-gray-300 whitespace-nowrap") Hola, 
-              strong(class="text-white") #{usuario.nombre_usuario}
+            a(href=`/perfil/${usuario.id}` class="flex items-center gap-3 group no-underline cursor-pointer")
+             span(class="text-sm font-medium text-gray-300 whitespace-nowrap") Hola, 
+              strong(class="text-white" title="Ir a mi Perfil") #{usuario.nombre_usuario}
             div(class="w-9 h-9 shrink-0 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md cursor-pointer border border-gray-800")
               | #{usuario.nombre_usuario.charAt(0).toUpperCase()}
             

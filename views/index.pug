@@ -1,58 +1,58 @@
 
 extends layout.pug
+
 block metadata
-    title Home - Fotaza
-    script(src="https://cdn.tailwindcss.com")
+  title Home - Fotaza
+  script(src="https://cdn.tailwindcss.com")
+
 block content
-
-    h1.text-3xl.font-bold.text-white.text-center Bienvenido a mi sitio web
-    p.text-100xl.text-gray-300
-      | Bienvenido a Fotaza. Sube, comparte y explora las mejores galerías en alta resolución. Tu próxima gran foto está aquí.
+  h1.text-3xl.font-bold.text-white.text-center Bienvenido a mi sitio web
+  p.text-lg.text-gray-300.text-center.mt-2.mb-8
+    | Bienvenido a Fotaza. Sube, comparte y explora las mejores galerías en alta resolución. Tu próxima gran foto está aquí.
+  
+  div(class="flex flex-col sm:flex-row justify-center gap-4 mb-10")
+    a(href="/nuevaFoto" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-6 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50 no-underline") Subir Foto
+  
+  div.contenedor-principal(class="flex flex-col md:flex-row gap-8 items-start w-full max-w-7xl mx-auto")
     
-    div(class="flex flex-col gap-2")
-     p(class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-       a(href="/login") Iniciar Sesión
+    aside.sidebar(class="w-full md:w-64 bg-gray-900/50 p-6 rounded-2xl border border-gray-800 shrink-0")
+     h3(class="text-white font-bold mb-4 border-b border-gray-800 pb-2") Categorías
+      ul(class="space-y-2 mb-8")
+        li
+          a(href=`/?orden=${filtrosActuales.orden || ''}` class=(!filtrosActuales.categoriaSeleccionada ? "text-cyan-400 font-bold" : "text-gray-400 hover:text-cyan-400 transition-colors no-underline")) Todas las fotos
+        if etiquetasSidebar && etiquetasSidebar.length > 0
+          each etiqueta in etiquetasSidebar
+            li
+              a(href=`/?categoria=${etiqueta.nombre}&orden=${filtrosActuales.orden || ''}` class=(filtrosActuales.categoriaSeleccionada === etiqueta.nombre ? "text-cyan-400 font-bold" : "text-gray-400 hover:text-cyan-400 transition-colors no-underline capitalize"))= etiqueta.nombre
      
-     p(href="/nuevaFoto" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-        a(href="/nuevaFoto") Subir Foto
-     
-     p(href="/mi-perfil" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-        a(href="/mi-perfil") Mi Perfil
-     
+      ul(class="space-y-2 mb-6")
+        li
+      h3(class="text-white font-bold mb-4 border-b border-gray-800 pb-2") Ordenar por
+      ul(class="space-y-2")
+        li
+          a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=recientes` class=(!filtrosActuales.orden || filtrosActuales.orden !== 'antiguas' ? "text-cyan-400 font-bold" : "text-gray-400 hover:text-cyan-400 no-underline")) Más recientes
+        li
+          a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=antiguas` class=(filtrosActuales.orden === 'antiguas' ? "text-cyan-400 font-bold" : "text-gray-400 hover:text-cyan-400 no-underline")) Más antiguas
       
-     div.contenedor-principal
-        aside.sidebar
-          h3 Categorias
-          ul
-            li
+    main(class="columns-1 sm:columns-2 md:columns-3 gap-6 w-full")
+      if fotos && fotos.length > 0
+        each foto in fotos
+          a(href=`/foto/${foto.id}` class="break-inside-avoid block mb-6 bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-cyan-500 hover:shadow-cyan-500/20 hover:-translate-y-1 transition-all duration-300 no-underline")
+            div.contenedor-imagen
+              if foto.imagenes && foto.imagenes.length > 0
+                img(src=foto.imagenes[0].url_imagen alt=foto.titulo class="w-full h-auto block")
+              else
+                div(class="w-full h-48 bg-gray-800 flex items-center justify-center text-gray-500") Sin imagen
+
+            div(class="p-4 flex flex-col")
+              h4(class="m-0 mb-1 font-bold text-white text-lg")= foto.titulo
+              p(class="m-0 text-sm text-gray-400") Por: #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
               
-          h3 Ordenar por
-          ul
-            li
-              // filtros de ordenamiento
-              a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=recientes` class=(!filtrosActuales.orden || filtrosActuales.orden !== 'antiguas' ? "activo" : "")) Más recientes
-            li
-              a(href=`/?categoria=${filtrosActuales.categoriaSeleccionada || ''}&orden=antiguas` class=(filtrosActuales.orden === 'antiguas' ? "activo" : "")) Más antiguas
-         
-               main(class="columns-2 md:columns-4 gap-4 p-4 w-full max-w-7xl mx-auto")
-                 if fotos && fotos.length > 0
-                   each foto in fotos
-                     a(href=`/foto/${foto.id}` class="break-inside-avoid block mb-4 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200")
-                       div.contenedor-imagen
-                         if foto.imagenes && foto.imagenes.length > 0
-                           img(src=foto.imagenes[0].url_imagen alt=foto.titulo class="w-full h-auto block")
-                         else
-                           div(class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500") Sin imagen
-
-                       div(class="p-3")
-                         h4(class="m-0 mb-1 font-bold text-gray-800")= foto.titulo
-
-                         p(class="m-0 text-sm text-gray-500") Por: #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
-                         if foto.etiquetas
-                           div(class="mt-2 flex flex-wrap gap-1")
-                             each etiqueta in foto.etiquetas
-                               span(class="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full")= etiqueta.nombre
-                 else
-                   div(class="w-full text-center p-12 text-gray-500")
-                     h2(class="text-xl font-semibold") No hay resultados
-                     p No se encontraron fotos con los filtros seleccionados.
+              if foto.etiquetas && foto.etiquetas.length > 0
+                div(class="mt-4 flex flex-wrap gap-2")
+                  each etiqueta in foto.etiquetas
+                    span(class="px-2.5 py-1 bg-cyan-900//30 border border-cyan-500/30 text-cyan-400 text-xs font-semibold rounded-lg shadow-sm") ##{etiqueta.nombre}
+      else
+        div(class="w-full text-center p-12 text-gray-400 bg-gray-900/50 rounded-2xl border border-gray-800 break-inside-avoid")
+          h2(class="text-xl font-semibold text-white mb-2") No hay resultados
+          p No se encontraron fotos con los filtros seleccionados.
