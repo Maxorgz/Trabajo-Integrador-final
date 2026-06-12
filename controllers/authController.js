@@ -2,7 +2,7 @@ import { Usuario } from '../models/index.js';
 
 export const registrarUsuario = async (req, res) => {
     try {
-        const { nombre_usuario, email, password } = req.body;
+        const { nombre_usuario, apellido_usuario, email, password } = req.body;
 
         if (!email || !nombre_usuario || !password) {
             return res.render('register', {
@@ -12,7 +12,7 @@ export const registrarUsuario = async (req, res) => {
                 }
             });
         }
-
+        
         if (password.length < 6) {
             return res.render('register', {
                 mensajeAlerta: {
@@ -37,6 +37,7 @@ export const registrarUsuario = async (req, res) => {
 
         await Usuario.create({
             nombre_usuario,
+            apellido_usuario,
             email,
             password,
             rol: 'usuario',

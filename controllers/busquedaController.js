@@ -13,29 +13,29 @@ export const realizarBusqueda = async (req, res) => {
             return res.redirect(req.get('referer') || '/');
         }
 
-        // BÚSQUEDA DE PERSONAS
+        // persona
         if (tipo === 'personas') {
             resultados = await Usuario.findAll({
                 where: {
                     nombre_usuario: {
-                        [Op.iLike]: `%${q}%` // Busca el texto en cualquier parte del nombre
+                        [Op.iLike]: `%${q}%` 
                     }
                 },
-                attributes: ['id', 'nombre_usuario'] // Solo traemos lo necesario, NO contraseñas
+                attributes: ['id', 'nombre_usuario'] 
             });
         } 
-        // BÚSQUEDA DE PUBLICACIONES
+        // publicacion
         else if (tipo === 'publicaciones') {
             resultados = await Publicacion.findAll({
                 where: {
-                    [Op.or]: [ // Puede coincidir el título O la descripción
+                    [Op.or]: [
                         { titulo: { [Op.iLike]: `%${q}%` } },
                         { descripcion: { [Op.iLike]: `%${q}%` } }
                     ]
                 },
                 include: [
-                    { model: Imagen, as: 'imagenes' }, // Para mostrar la miniatura
-                    { model: Usuario, attributes: ['nombre_usuario'] } // Para saber de quién es
+                    { model: Imagen, as: 'imagenes' }, 
+                    { model: Usuario, attributes: ['nombre_usuario'] }
                 ],
                 order: [['createdAt', 'DESC']]
             });

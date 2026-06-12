@@ -1,35 +1,56 @@
-import model, { DataTypes } from "sequelize";
-import sequelize from "../config/database.js";
+import sequelize from '../config/db.js';
+import { Model, DataTypes } from 'sequelize';
 
-export class User extends model {}
-User.init({
+export class Usuario extends Model {}
+
+Usuario.init(
+  {
     id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    firstName: {
-        type: DataTypes.STRING,
-        allowNull: false
+
+    nombre_usuario: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
     },
-    lastName: {
-        type: DataTypes.STRING,
-        allowNull: false
+
+    apellido_usuario: {
+      type: DataTypes.STRING(50),
+      
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
     },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-}, {
-    sequelize,
-    modelName: "User",
-    tableName: "users",
-    createdAt: "created_at",
-    deletedAt: "deleted_at",
-});
 
+    password: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+
+    rol: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'usuario'
+    },
+
+    estado: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'activo'
+    }
+
+  },
+  {
+    
+    sequelize,
+    modelName: 'Usuario', 
+    tableName: 'usuarios',
+    timestamps: 'false',
+    createdAt: 'true',
+    deletedAt: 'true',
+  },
+);
+
+export default Usuario;

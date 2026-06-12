@@ -1,4 +1,4 @@
-import sequelize from '../models/config.js';
+import sequelize from '../config/db.js';
 import { Model, DataTypes } from 'sequelize';
 
 export class Mensaje extends Model {}
@@ -39,3 +39,4 @@ Mensaje.init(
     timestamps:'false',
   },
 );
+export default Mensaje;

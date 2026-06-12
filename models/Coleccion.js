@@ -1,4 +1,4 @@
-import sequelize from '../models/config.js';
+import sequelize from '../config/db.js';
 import { Model, DataTypes } from 'sequelize';
 
 export class Coleccion extends Model {}

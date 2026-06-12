@@ -1,5 +1,7 @@
-import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios} from '../models/index.js';
+import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor } from '../models/index.js';
 
+//----------------------------------------------------------------------------
+//home
 export const mostrarInicio = async (req, res) => {
     try {
         const fotosEncontradas = await Publicacion.findAll({
@@ -14,7 +16,6 @@ export const mostrarInicio = async (req, res) => {
         const etiquetas = await Etiqueta.findAll();
 
         res.render('index', {
-            // ❌ No pasamos el usuario manualmente, tu middleware del index.js ya lo hace
             fotos: fotosEncontradas,
             filtrosActuales: {}, 
             etiquetasSidebar: etiquetas 
@@ -29,7 +30,8 @@ export const mostrarInicio = async (req, res) => {
         });
     }
 };
-
+//-------------------------------------------------------------------
+//Detallefoto
 export const mostrarDetalleFoto = async (req, res) => {
     try {
         const idFoto = req.params.id;
@@ -44,8 +46,6 @@ export const mostrarDetalleFoto = async (req, res) => {
                 { model: Usuario }, 
                 { model: Imagen, as: 'imagenes' },
                 { model: Etiqueta, as: 'etiquetas' },
-                
-                // Agregamos las relaciones
                 { model: Valoracion, as: 'valoraciones' },
                 { 
                     model: Comentarios, 
@@ -62,7 +62,6 @@ export const mostrarDetalleFoto = async (req, res) => {
             return res.status(404).send('Foto no encontrada');
         }
 
-        // 🧮 MATEMÁTICA: Calculamos likes y promedios solo si existen
         let totalLikes = 0;
         let promedio = 0;
         let totalVotosPuntaje = 0;
@@ -92,7 +91,8 @@ export const mostrarDetalleFoto = async (req, res) => {
         res.status(500).send('Error al cargar la publicación');
     }
 };
-
+//--------------------------------------------------------------------------
+//mostrarFormulario
 export const mostrarFormularioNuevo = async (req,res)=>{
     try{
         const etiquetasDisponibles = await Etiqueta.findAll();
@@ -110,7 +110,8 @@ export const mostrarFormularioNuevo = async (req,res)=>{
         });
     }
 };
-
+//--------------------------------------------------------------------------------------
+//Crear publicacion
 export const crearPublicacion = async (req,res)=>{
     try{
         const { titulo, descripcion, tiene_copyright, imagenes_base64, etiquetas, nuevas_etiquetas } = req.body;
@@ -194,7 +195,8 @@ export const crearPublicacion = async (req,res)=>{
         }
     }
 };
-
+//----------------------------------------------------------------
+//megusta
  export const darMeGusta = async (req, res) => {
     const id_publicacion = req.params.id_publicacion; 
 
@@ -228,7 +230,8 @@ export const crearPublicacion = async (req,res)=>{
         res.redirect(id_publicacion ? `/foto/${id_publicacion}` : '/'); 
     }
 };
-
+//----------------------------------------------------------------------
+//agregar comentario
 export const agregarComentario = async (req, res) => {
     try {
         const { id_publicacion } = req.params;
@@ -250,7 +253,8 @@ export const agregarComentario = async (req, res) => {
         res.redirect('/');
     }
 };
-
+//-----------------------------------------------------------------------
+//eliminar comentarios
 export const eliminarComentario = async (req, res) => {
     try {
         const { id_comentario } = req.params;
@@ -283,7 +287,8 @@ export const eliminarComentario = async (req, res) => {
         res.status(500).send("Error al borrar comentario");
     }
 };
-
+//-------------------------------------------------------------------
+//Mostrar el perfil
 export const mostrarPerfil = async (req, res) => {
     try {
         const { id } = req.params;
@@ -292,7 +297,6 @@ export const mostrarPerfil = async (req, res) => {
         if (!perfilUsuario) {
             return res.redirect('/'); 
         }
-
         const publicaciones = await Publicacion.findAll({
             where: { usuario_id: id },
             include: [
@@ -301,15 +305,38 @@ export const mostrarPerfil = async (req, res) => {
             ],
             order: [['createdAt', 'DESC']]
         });
-
         const fotosPlanas = publicaciones.map(foto => foto.toJSON());
+        const cantSeguidores = await Seguidor.count({ where: { usuario_seguido_id: id } });
+        const cantSeguidos = await Seguidor.count({ where: { usuario_seguidor_id: id } });
+
+       
+        let esMiPerfil = false;
+        let loSigo = false;
+
+        if (req.session.usuario) {
+           
+            esMiPerfil = req.session.usuario.id === parseInt(id);
+            
+          
+            if (!esMiPerfil) {
+                const relacion = await Seguidor.findOne({
+                    where: {
+                        usuario_seguidor_id: req.session.usuario.id,
+                        usuario_seguido_id: id
+                    }
+                });
+                if (relacion) loSigo = true;
+            }
+        }
 
         res.render('perfil', {
             usuario: req.session.usuario, 
             dueñoPerfil: perfilUsuario,   
             fotos: fotosPlanas,          
-            cantSeguidores: 0,
-            cantSeguidos: 0
+            cantSeguidores,
+            cantSeguidos,
+            esMiPerfil, 
+            loSigo     
         });
 
     } catch (error) {
@@ -317,8 +344,8 @@ export const mostrarPerfil = async (req, res) => {
         res.redirect('/');
     }
 };
-
-
+//--------------------------------------------------
+//funcion para mostrarseguidores
 export const mostrarFeedSeguidos = async (req, res) => {
     try {
         const mi_id = req.session.usuario.id;
@@ -359,7 +386,8 @@ export const mostrarFeedSeguidos = async (req, res) => {
         res.redirect('/');
     }
 };
-
+//--------------------------------------------------------------
+ //funcion para valorar publicacion
 export const valorarPublicacion = async (req, res) => {
     try {
         const id_publicacion = req.params.id_publicacion; 
@@ -390,6 +418,39 @@ export const valorarPublicacion = async (req, res) => {
 });
     } catch (error) {
         console.error("Error en la valoracion:", error);
+        res.redirect('/');
+    }
+};
+
+//-------------------------------------------------------------------------------
+//boton seguir 
+export const alternarSeguir = async (req, res) => {
+    try {
+        const id_a_seguir = req.params.id;
+        const mi_id = req.session.usuario.id;
+        if (id_a_seguir == mi_id) {
+            return res.redirect('back'); 
+        }
+        const relacion = await Seguidor.findOne({
+            where: { 
+                usuario_seguidor_id: mi_id, 
+                usuario_seguido_id: id_a_seguir 
+            }
+        });
+
+        if (relacion) {
+            await relacion.destroy();
+        } else {
+            await Seguidor.create({
+                usuario_seguidor_id: mi_id,
+                usuario_seguido_id: id_a_seguir
+            });
+        }
+
+        res.redirect(`/perfil/${id_a_seguir}`);
+
+    } catch (error) {
+        console.error("Error al seguir/dejar de seguir:", error);
         res.redirect('/');
     }
 };

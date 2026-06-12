@@ -1,49 +1,63 @@
 extends layout
-
+block metadata
+  title Perfil
+  script(src="https://cdn.tailwindcss.com")
 block content
-  //Contenedor principal
-  div(class="max-w-[1000px] mx-auto my-10 p-5")
-    
-    h2(class="text-white text-center mb-8 text-3xl font-bold") Mi Perfil
+  div(class="w-full max-w-screen-xl mx-auto px-4 sm:px-8 py-10 font-sans")
+   
+    div(class="flex flex-col items-center justify-center mb-8")
+      if esMiPerfil
+        h2(class="text-white text-3xl font-bold m-0") Mi Perfil
+      else
+        h2(class="text-white text-3xl font-bold m-0") Perfil de #{dueñoPerfil.nombre_usuario}
+        
+        if usuario
+          form(action=`/perfil/${dueñoPerfil.id}/seguir` method="POST" class="mt-4")
+            if loSigo
+              button(type="submit" class="px-6 py-2 bg-gray-700 hover:bg-red-600 text-white font-semibold rounded-full transition-colors shadow-md") Dejar de seguir
+            else
+              button(type="submit" class="px-6 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-full transition-colors shadow-md shadow-cyan-500/20") Seguir
 
-    //Seguidores
-    div(class="flex justify-center gap-8 my-6 text-lg text-gray-400")
-      div
-        strong(class="text-white") #{cantSeguidores} 
-        | Seguidores
-      div
-        strong(class="text-white") #{cantSeguidos} 
-        | Seguidos
+    div(class="flex justify-center gap-16 my-8 text-lg text-gray-400 border-y border-gray-800 py-6 max-w-2xl mx-auto")
+      div(class="text-center flex flex-col items-center")
+        strong(class="text-white text-3xl mb-1") #{cantSeguidores} 
+        span(class="text-sm uppercase tracking-widest font-medium") Seguidores
+      div(class="text-center flex flex-col items-center")
+        strong(class="text-white text-3xl mb-1") #{cantSeguidos} 
+        span(class="text-sm uppercase tracking-widest font-medium") Seguidos
 
-    //Galería de fotos
-    if fotos && fotos.length > 0
-      div.galeria(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
-        each foto in fotos
-          
-          
-          div.tarjeta-foto(class="relative rounded-lg overflow-hidden shadow-md bg-gray-800 border border-gray-700 hover:shadow-cyan-500/20 hover:shadow-lg transition-all duration-300")
-            
-            a(href=`/foto/${foto.id}` class="block no-underline text-inherit")
-              div.contenedor-imagen
-                if foto.imagenes && foto.imagenes.length > 0
-                  img(src=foto.imagenes[0].url_imagen alt=foto.titulo class="w-full h-[350px] object-cover object-center")
+    div(class="mt-10 w-full")
+      if fotos && fotos.length > 0
+        
+        div.galeria(class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6")
+          each foto in fotos
+            div.tarjeta-foto(class="relative rounded-xl overflow-hidden shadow-md bg-gray-900 border border-gray-800 hover:border-cyan-500 transition-all duration-300 group flex flex-col")
               
-              div.info-foto(class="p-4")
-                h4(class="m-0 text-white text-lg font-semibold")= foto.titulo
-                if foto.descripcion
-                  p(class="mt-2 mb-0 text-gray-300 text-sm line-clamp-2")= foto.descripcion
-                else
-                  p(class="mt-2 mb-0 text-gray-500 text-sm italic") Sin descripción
+              a(href=`/foto/${foto.id}` class="block no-underline text-inherit flex-grow")
+                div.contenedor-imagen(class="relative w-full aspect-square bg-black overflow-hidden")
+                  if foto.imagenes && foto.imagenes.length > 0
+                    img(src=foto.imagenes[0].url_imagen alt=foto.titulo class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500")
+                
+                div.info-foto(class="p-4")
+                  h4(class="m-0 text-white text-lg font-semibold truncate")= foto.titulo
+                  if foto.descripcion
+                    p(class="mt-2 mb-0 text-gray-400 text-sm line-clamp-2")= foto.descripcion
+                  else
+                    p(class="mt-2 mb-0 text-gray-600 text-sm italic") Sin descripción
+                    
+              if esMiPerfil
+                div(class="flex justify-between items-center px-4 py-3 bg-gray-950 border-t border-gray-800 mt-auto")
+                  a(href=`/publicacion/${foto.id}/editar` class="text-cyan-500 text-sm font-bold hover:text-cyan-400 transition-colors no-underline") Editar
                   
-           
-            div(class="flex justify-between items-center px-4 py-3 bg-gray-900/50 border-t border-gray-700")
-              a(href=`/publicacion/${foto.id}/editar` class="text-cyan-400 font-bold hover:text-cyan-300 transition-colors") Editar
-              
-              form(action=`/publicacion/${foto.id}/eliminar` method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta foto para siempre?');" class="m-0")
-                button(type="submit" class="bg-transparent border-none text-red-500 font-bold cursor-pointer hover:text-red-400 transition-colors") Eliminar
-    
-    else
+                  form(action=`/publicacion/${foto.id}/eliminar` method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta foto para siempre?');" class="m-0")
+                    button(type="submit" class="bg-transparent border-none text-red-500 text-sm font-bold cursor-pointer hover:text-red-400 transition-colors p-0") Eliminar
       
-      div(class="text-center p-10 bg-gray-800/50 border border-gray-700 rounded-lg shadow-sm max-w-2xl mx-auto")
-        h3(class="text-gray-300 text-xl font-medium") Aún no hay fotos subidas.
-        a(href="/nuevaFoto" class="mt-5 inline-block px-6 py-2 bg-cyan-600 text-white rounded-md hover:bg-cyan-500 transition-colors font-semibold") ¡Sube tu primera Fotaza!
+      else
+        div(class="text-center py-16 bg-gray-900/50 border border-gray-800 rounded-2xl shadow-sm max-w-2xl mx-auto mt-8")
+          span(class="text-5xl block mb-4") 📷
+          h3(class="text-white text-2xl font-bold mb-2 m-0") Aún no hay fotos
+          if esMiPerfil
+            p(class="text-gray-400 mb-6 m-0") Tu galería está vacía. Empezá a compartir tus momentos.
+            a(href="/nuevaFoto" class="inline-block px-6 py-3 bg-cyan-600 text-white rounded-xl hover:bg-cyan-500 transition-colors font-bold shadow-lg shadow-cyan-500/20 no-underline") Subir mi primera foto
+          else
+            p(class="text-gray-400 m-0") Este usuario aún no ha compartido ninguna publicación.
