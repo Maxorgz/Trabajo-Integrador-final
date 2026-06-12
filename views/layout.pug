@@ -11,10 +11,10 @@ html
     block metadata
 
     script(src="/socket.io/socket.io.js")
-    script(src="home.js")
-    script(src="login.js")
+    script(src="/home.js")
+    script(src="/login.js")
 
-    link(rel='stylesheet' href='./stylesheets/index.css')
+    link(rel='stylesheet' href='/stylesheets/index.css')
     
 
 
@@ -23,8 +23,8 @@ html
       nav.px-4.py-4.flex.flex-grow.justify-between.items-center
         div.flex.items-center.gap-5.text-lg.font-bold.text-white.tracking-wide
           a(href="/unauthenticated/fotaza").text-slate-300.hover_text-white.transition Galería
-          a(href="/login").text-slate-300.hover_text-white.transition Iniciar Sesión
-          a(href="/register").text-slate-300.hover_text-white.transition Registrarse
+          a(href="/auth/login").text-slate-300.hover_text-white.transition Iniciar Sesión
+          a(href="/auth/register").text-slate-300.hover_text-white.transition Registrarse
     
 
 

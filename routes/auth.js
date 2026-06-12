@@ -6,10 +6,10 @@ import { cerrarSesion } from '../controllers/authController.js';
 const router = express.Router();
 
 //registro
-router.get('/registro', (req, res) =>{
-    res.render('registro');
+router.get('/register', (req, res) =>{
+    res.render('register');
 })
-router.post('/registro', registrarUsuario);
+router.post('/register', registrarUsuario);
 
 //login
 router.get('/login', (req, res) => {

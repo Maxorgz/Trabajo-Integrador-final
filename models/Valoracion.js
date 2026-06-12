@@ -9,12 +9,12 @@ Valoracion.init(
         primaryKey: true,
         autoIncrement: true
     },
-    imagen_id: {
+    publicacion_id: {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    usuario_id: {
-        type: DataTypes.INTEGER,
+    me_gusta: {
+        type: DataTypes.BOOLEAN,
         allowNull: false
     },
     puntaje: {
@@ -29,7 +29,8 @@ Valoracion.init(
  }, {
     sequelize,
     tableName: 'valoraciones',
-    timestamps: false
+    timestamps: false,
+    defaultValue: false
  }
 );
 export default Valoracion;
