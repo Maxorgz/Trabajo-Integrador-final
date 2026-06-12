@@ -2,113 +2,157 @@ extends layout
 
 block metadata
   title Detalle de fotos 
+  style.
+    
+    .carrusel-slide { opacity: 0; visibility: hidden; transition: opacity 0.5s ease-in-out, visibility 0.5s; z-index: 0; }
+    .carrusel-slide.activo { opacity: 1; visibility: visible; z-index: 10; }
 
 block content
-  //Contenedor principal centrado 
-  div(class="max-w-5xl mx-auto my-8 p-4 md:p-8 bg-gray-900 rounded-xl shadow-2xl text-gray-200")
+  
+  div(class="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat bg-fixed py-6 sm:py-10 px-4 sm:px-6 lg:px-8")
     
-    //Aviso para invitados
-    if !usuario
-      div(class="bg-yellow-900/40 border border-yellow-700/50 text-yellow-300 p-4 rounded-lg mb-8 text-center font-medium shadow-sm")
-        p(class="m-0") Estás viendo esto como invitado. Inicia sesión para dar like, comentar o ver otras opciones.
+    
+    div(class="absolute inset-0 bg-gray-900/85 z-0")
 
-    div(class="space-y-6")
+    //principal
+    div(class="relative z-10 max-w-screen-2xl mx-auto")
+
       
-      //Autor
-      p(class="text-gray-400 text-sm m-0") Publicado por: 
-        span(class="font-bold text-white text-base") #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
+      if !usuario
+        div#toast-invitado(class="fixed bottom-6 right-6 z-50 flex max-w-sm items-start gap-3 p-4 bg-white/10 backdrop-blur-xl border border-cyan-500/50 rounded-xl shadow-[0_10px_40px_-10px_rgba(6,182,212,0.3)] transition-all duration-500 hover:-translate-y-1")
+          div(class="text-cyan-400 bg-cyan-900/50 p-2 rounded-full shrink-0")
+            svg(class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z")
+          div(class="flex-1 mt-0.5")
+            h4(class="text-sm font-bold text-white mb-1") Modo Invitado
+            p(class="text-xs text-gray-300 m-0 leading-relaxed") Inicia sesión para dar like, calificar y comentar.
+            a(href="/auth/login" class="inline-block mt-2 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors") Iniciar sesión ahora &rarr;
+          button(onclick="document.getElementById('toast-invitado').style.display='none'" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-white rounded-md transition-colors")
+            svg(class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12")
 
-      // Carrusel
-      div(class="relative w-full h-[400px] md:h-[600px] bg-black rounded-xl overflow-hidden flex items-center justify-center shadow-inner group")
-        if foto.imagenes && foto.imagenes.length > 0
-          if foto.imagenes.length > 1
-            //- Botones del carrusel (Aparecen más visibles al pasar el mouse por el contenedor)
-            button(onclick="cambiarImagen(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/90 text-white w-10 h-10 rounded-full z-20 transition-all opacity-70 group-hover:opacity-100 flex items-center justify-center text-xl") &#10094;
-            button(onclick="cambiarImagen(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/90 text-white w-10 h-10 rounded-full z-20 transition-all opacity-70 group-hover:opacity-100 flex items-center justify-center text-xl") &#10095;
-          
-          each imagen, index in foto.imagenes
-            //- Mantenemos tus clases JS intactas (.carrusel-slide y .activo)
-            div(class=`${index === 0 ? "activo" : ""} w-full h-full flex justify-center items-center absolute inset-0`)
-              img(src=imagen.url_imagen alt=foto.titulo class="max-w-full max-h-full object-contain")
-
-      //Etiquetas
-      if foto.etiquetas && foto.etiquetas.length > 0
-        div(class="flex flex-wrap gap-2 mt-6")
-          each etiqueta in foto.etiquetas
-            span(class="bg-[#8a5a44] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm")= etiqueta.nombre
-
-      //Descripción y Fecha
-      if foto.descripcion
-        p(class="text-gray-300 mt-4 leading-relaxed text-lg")= foto.descripcion
-      p(class="text-gray-500 text-sm mt-2 font-medium") Publicado el: #{foto.createdAt ? new Date(foto.createdAt).toLocaleString('es-AR', { hour12: false }) : 'Fecha no disponible'}
-
-      //Likes y Promedio
-      div(class="mt-6 inline-flex flex-wrap items-center gap-x-6 gap-y-2 bg-gray-800 border border-gray-700 px-5 py-3 rounded-lg shadow-sm")
-        span(class="font-bold text-cyan-400 text-lg") ❤️ #{totalLikes} Me gusta
-        span(class="font-bold text-amber-400 text-lg") ⭐ Promedio: #{promedio} 
-        span(class="text-gray-400 text-sm font-medium") (#{totalVotosPuntaje} valoraciones)
-
-      //Likes, Votos, Me Interesa
-      div(class="mt-8 flex flex-wrap gap-4 items-center")
-        if usuario
-          if usuario.id !== foto.usuario_id
-            form(action=`/publicacion/${foto.id}/like` method="POST" class="m-0")
-              button(type="submit" class="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition-colors shadow-sm") Me gusta
-            
-            form(action=`/publicacion/${foto.id}/valorar` method="POST" class="m-0 flex gap-2")
-              select(name="puntaje" required class="px-3 py-2.5 bg-gray-800 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-cyan-500 outline-none cursor-pointer")
-                option(value="" disabled selected) Calificar...
-                option(value="5") 5 ⭐
-                option(value="4") 4 ⭐
-                option(value="3") 3 ⭐
-                option(value="2") 2 ⭐
-                option(value="1") 1 ⭐
-              button(type="submit" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white font-semibold rounded-lg transition-colors shadow-sm") Enviar Voto
-            
-            form(action=`/publicacion/${foto.id}/me-interesa` method="POST" class="m-0")
-              button(type="submit" class="px-5 py-2.5 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition-colors shadow-sm") Me interesa
-          
-          else 
-            a(href=`/publicacion/${foto.id}/editar` class="px-6 py-2.5 bg-[#f39c12] hover:bg-orange-500 text-white font-semibold rounded-lg transition-colors shadow-sm no-underline inline-block") Editar
+      
+      div(class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mt-4")
         
-        else
-          //botones deshabilitados para invitados
-          button(disabled class="px-5 py-2.5 bg-cyan-900 text-cyan-500 font-semibold rounded-lg opacity-60 cursor-not-allowed") Me gusta
-          div(class="flex gap-2")
-            select(disabled class="px-3 py-2.5 bg-gray-800 border border-gray-700 text-gray-500 rounded-lg opacity-60 cursor-not-allowed")
-              option(value="" disabled selected) Calificar...
-          button(disabled class="px-5 py-2.5 bg-green-900 text-green-500 font-semibold rounded-lg opacity-60 cursor-not-allowed") Me interesa
+    
+        div(class="lg:col-span-8 flex flex-col gap-6")
+          
+          //carrousel
+          div(class="relative w-full h-[50vh] md:h-[75vh] bg-black/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group")
+            if foto.imagenes && foto.imagenes.length > 0
+              
+              if foto.imagenes.length > 1
+                button(onclick="cambiarImagen(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-20 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10094;
+                button(onclick="cambiarImagen(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-20 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10095;
+              
+              each imagen, index in foto.imagenes
+                div.carrusel-slide(class=`${index === 0 ? "activo" : ""} w-full h-full flex justify-center items-center absolute inset-0`)
+                  img(src=imagen.url_imagen alt=foto.titulo class="max-w-full max-h-full object-contain drop-shadow-2xl")
 
+          //comentario
+          div(class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 sm:p-8 shadow-2xl")
+            h3(class="text-xl font-bold text-white mb-6 flex items-center gap-2") 
+              span(class="text-cyan-400 drop-shadow-md") 💬
+              | Comentarios
 
-      //Comentarios
-      div(class="mt-12 pt-8 border-t border-gray-700")
-        h3(class="text-2xl font-bold text-white mb-6") Comentarios
+            if usuario
+              form(action=`/publicacion/${foto.id}/comentar` method="POST" class="mb-8 relative")
+                textarea(name="texto" required placeholder="Agrega un comentario..." rows="2" class="w-full pl-4 pr-32 py-4 bg-black/40 backdrop-blur-md border border-white/20 text-white rounded-xl focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 outline-none resize-none transition-all placeholder-gray-400")
+                button(type="submit" class="absolute right-2 bottom-2 px-4 py-2 bg-cyan-600/90 hover:bg-cyan-500 backdrop-blur text-white text-sm font-bold rounded-lg transition-colors shadow-lg") Publicar
+            else
+              div(class="mb-8 p-4 border border-white/10 rounded-xl bg-black/40 backdrop-blur text-center")
+                p(class="text-gray-300 text-sm m-0") 
+                  a(href="/auth/login" class="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors") Inicia sesión
+                  |  para unirte a la conversación.
 
-        if foto.comentarios && foto.comentarios.length > 0
-          div(class="space-y-4")
-            each comentario in foto.comentarios
-              div.comentario(class="bg-gray-800 p-5 rounded-xl border border-gray-700 shadow-sm")
-                div(class="flex justify-between items-center mb-2")
-                  strong(class="text-cyan-400 text-lg")= comentario.Usuario.nombre_usuario
-                  span(class="text-gray-500 text-xs font-medium") #{new Date(comentario.createdAt).toLocaleString('es-AR', { hour12: false})}
-                
-                p(class="text-gray-200 m-0 leading-relaxed")= comentario.texto
-                
-        else
-          p(class="text-gray-400 italic mb-8") Aún no hay comentarios. Sé el primero en opinar.
+            if foto.comentarios && foto.comentarios.length > 0
+              div(class="space-y-4")
+                each comentario in foto.comentarios
+                  div.comentario(class="bg-black/30 backdrop-blur-sm p-4 rounded-xl border border-white/10 hover:border-white/20 transition-colors")
+                    div(class="flex justify-between items-start mb-2")
+                      div(class="flex items-center gap-2")
+                        div(class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-md")
+                          | #{comentario.Usuario.nombre_usuario.charAt(0).toUpperCase()}
+                        div
+                          strong(class="text-gray-100 text-sm block")= comentario.Usuario.nombre_usuario
+                          span(class="text-gray-400 text-[10px] uppercase font-bold tracking-wider") #{new Date(comentario.createdAt).toLocaleDateString('es-AR')}
+                      
+                      if usuario && usuario.id === comentario.usuario_id
+                        form(action=`/comentario/${comentario.id}/eliminar` method="POST" class="m-0")
+                          button(type="submit" class="text-gray-400 hover:text-red-400 p-1 rounded transition-colors" title="Eliminar")
+                            svg(class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+                              path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16")
+                    
+                    p(class="text-gray-300 text-sm m-0 pl-10 leading-relaxed")= comentario.texto
+            else
+              div(class="text-center py-10")
+                p(class="text-gray-400 italic") Aún no hay comentarios. Sé el primero en opinar.
+
+       
+        div(class="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-8")
+          
         
-        //Caja para publicar nuevo comentario
-        if usuario
-          form(action=`/publicacion/${foto.id}/comentar` method="POST" class="mt-8 bg-gray-800 p-1 sm:p-5 rounded-xl border border-gray-700 shadow-sm")
-            textarea(name="texto" required placeholder="Escribe un comentario..." rows="3" class="w-full p-4 bg-gray-900 border border-gray-600 text-white rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 outline-none resize-y")
-            div(class="flex justify-end")
-              button(type="submit" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg transition-colors shadow-sm") Publicar Comentario
-        else
-          div(class="mt-8 p-5 border border-gray-700 rounded-xl bg-gray-800/50 text-center")
-            p(class="text-gray-400 m-0") 
-              a(href="/login" class="text-cyan-400 hover:underline font-semibold") Inicia sesión
-              |  para publicar un comentario.
+          div(class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 sm:p-8 shadow-2xl")
+            
+            div(class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10")
+              div(class="w-12 h-12 rounded-full bg-gradient-to-tr from-[#8a5a44] to-orange-400 flex items-center justify-center text-white font-bold text-xl shadow-lg")
+                | #{foto.Usuario ? foto.Usuario.nombre_usuario.charAt(0).toUpperCase() : '?'}
+              div
+                p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold mb-1") Publicado por
+                p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm") #{foto.Usuario ? foto.Usuario.nombre_usuario : 'Desconocido'}
+            
+            if foto.descripcion
+              p(class="text-gray-200 leading-relaxed text-sm mb-6")= foto.descripcion
+            
+            if foto.etiquetas && foto.etiquetas.length > 0
+              div(class="flex flex-wrap gap-2 mb-6")
+                each etiqueta in foto.etiquetas
+                  span(class="bg-white/10 border border-white/20 hover:border-cyan-400 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-default shadow-sm") ##{etiqueta.nombre}
+            
+            
+            div(class="flex flex-col gap-3 bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 mb-6 shadow-inner")
+              div(class="flex justify-between items-center")
+                span(class="text-gray-300 text-sm font-medium") Likes Totales
+                span(class="font-bold text-cyan-400 text-lg drop-shadow-md") ❤️ #{totalLikes}
+              div(class="flex justify-between items-center")
+                span(class="text-gray-300 text-sm font-medium") Puntuación
+                div(class="flex items-center gap-2")
+                  span(class="font-bold text-amber-400 text-lg drop-shadow-md") ⭐ #{promedio} 
+                  span(class="text-gray-400 text-xs") (#{totalVotosPuntaje} votos)
 
+            //panel
+            div(class="space-y-3")
+              if usuario
+                if usuario.id !== foto.usuario_id
+                  
+                  form(action=`/publicacion/${foto.id}/like` method="POST" class="m-0")
+                    button(type="submit" class="w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-cyan-500/80 backdrop-blur-md border border-white/20 hover:border-cyan-400 text-white font-semibold rounded-xl transition-all group shadow-lg") 
+                      span(class="group-hover:scale-125 transition-transform") ❤️
+                      | Dar Me gusta
+                  
+                  form(action=`/publicacion/${foto.id}/valorar` method="POST" class="m-0 flex gap-2")
+                    select(name="puntaje" required class="flex-1 px-3 py-3 bg-black/50 border border-white/20 text-white rounded-xl focus:ring-1 focus:ring-amber-400 outline-none cursor-pointer text-sm font-medium backdrop-blur-sm")
+                      option(value="" disabled selected) Calificar foto...
+                      option(value="5") 5 Estrellas ⭐⭐⭐⭐⭐
+                      option(value="4") 4 Estrellas ⭐⭐⭐⭐
+                      option(value="3") 3 Estrellas ⭐⭐⭐
+                      option(value="2") 2 Estrellas ⭐⭐
+                      option(value="1") 1 Estrella ⭐
+                    button(type="submit" class="px-5 py-3 bg-amber-500/20 hover:bg-amber-500 backdrop-blur-md text-amber-400 hover:text-white border border-amber-500/50 font-semibold rounded-xl transition-all shadow-lg") Votar
+                  
+                  form(action=`/publicacion/${foto.id}/me-interesa` method="POST" class="m-0")
+                    button(type="submit" class="w-full flex items-center justify-center gap-2 py-3 bg-green-500/20 hover:bg-green-500 backdrop-blur-md border border-green-500/50 hover:border-green-400 text-green-400 hover:text-white font-semibold rounded-xl transition-all shadow-lg")
+                      | 📌 Me interesa
+              
+                else 
+                  a(href=`/publicacion/${foto.id}/editar` class="w-full flex justify-center py-3 bg-[#f39c12]/20 hover:bg-[#f39c12] backdrop-blur-md border border-[#f39c12]/50 text-[#f39c12] hover:text-white font-bold rounded-xl transition-all no-underline tracking-wide shadow-lg") ✏️ Editar Publicación
+              
+              else
+                button(disabled class="w-full py-3 bg-black/30 backdrop-blur-sm text-gray-500 font-semibold rounded-xl cursor-not-allowed border border-white/5") ❤️ Me gusta
+                div(class="flex gap-2")
+                  select(disabled class="flex-1 px-3 py-3 bg-black/30 backdrop-blur-sm border border-white/5 text-gray-500 rounded-xl cursor-not-allowed")
+                    option(value="" disabled selected) Calificar...
+                  button(disabled class="px-5 py-3 bg-black/30 backdrop-blur-sm text-gray-500 border border-white/5 rounded-xl cursor-not-allowed") Votar
 
 block scripts  
   script.

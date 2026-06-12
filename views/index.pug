@@ -12,18 +12,12 @@ block content
     div(class="flex flex-col gap-2")
      p(class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
        a(href="/login") Iniciar Sesión
-
-     p(href="/register" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-       a(href="/register") Registrarse
      
      p(href="/nuevaFoto" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
         a(href="/nuevaFoto") Subir Foto
      
-     p(href="/login" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-        a(href="/logout") Cerrar Sesion
-
-     p(href="/perfil" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
-        a(href="/perfil") Mi Perfil
+     p(href="/mi-perfil" class="bg-[#5b13b9] hover:bg-[#9056c7] text-white px-2 py-3 rounded-full text-center font-semibold transition shadow-lg shadow-purple-900/50")
+        a(href="/mi-perfil") Mi Perfil
      
       
      div.contenedor-principal
@@ -32,13 +26,6 @@ block content
           ul
             li
               
-              a(href=`/?orden=${filtrosActuales.orden || ''}` class=(!filtrosActuales.categoriaSeleccionada ? "activo" : "")) Ver Todas
-            
-            if etiquetasSidebar && etiquetasSidebar.length > 0
-              each tag in etiquetasSidebar
-                li
-                  a(href=`/?categoria=${tag.nombre}&orden=${filtrosActuales.orden || ''}` class=(filtrosActuales.categoriaSeleccionada === etiquetas.nombre ? "activo" : ""))= etiquetas.nombre
-    
           h3 Ordenar por
           ul
             li

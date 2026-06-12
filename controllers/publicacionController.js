@@ -1,77 +1,56 @@
-import { Publicacion, Imagen, Usuario, Etiquetas, Valoracion, Comentarios, Denuncia } from '../models/index.js';
+import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios} from '../models/index.js';
 
 export const mostrarInicio = async (req, res) => {
     try {
-        const categoriaSeleccionada = req.query.categoria;
-
-        let opcionesDeBusqueda = {
+        const fotosEncontradas = await Publicacion.findAll({
             include: [
-                { model: Imagen, as: 'imagenes',
-                    where: req.session.usuario ? {} : { licencia: 'sin_copyright'},
-                    required: !req.session.usuario ? true : false },
-                { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] }
-            ]
-        };
-
-        if (categoriaSeleccionada) {
-            opcionesDeBusqueda.include.push({
-                model: Etiquetas,
-                as: 'etiquetas', 
-                where: { nombre: categoriaSeleccionada } 
-            });
-        } else {
-            opcionesDeBusqueda.include.push({
-                model: Etiquetas,
-                as: 'etiquetas'
-            });
-        }
-
-        const publicaciones = await Publicacion.findAll(opcionesDeBusqueda);
-        const fotosPlanas = publicaciones.map(foto => foto.toJSON());
-
-        res.render('index', { 
-            usuario: req.session.usuario,
-            fotos: fotosPlanas,
-            categoriaActiva: categoriaSeleccionada,
+                { model: Imagen, as: 'imagenes' }, 
+                { model: Usuario },
+                { model: Etiqueta, as: 'etiquetas' }
+            ],
+            order: [['createdAt', 'DESC']]
         });
-    } catch (error) {
-        console.error("Error al obtener publicaciones:", error);
+
+        const etiquetas = await Etiqueta.findAll();
+
         res.render('index', {
-            usuario: req.session.usuario,
-            fotos: [],
-            mensajeAlerta: { status: 'error', text: 'Error al cargar las publicaciones' }
+            // ❌ No pasamos el usuario manualmente, tu middleware del index.js ya lo hace
+            fotos: fotosEncontradas,
+            filtrosActuales: {}, 
+            etiquetasSidebar: etiquetas 
+        });
+        
+    } catch (error) {
+        console.error("Error cargando la galería:", error);
+        res.render('index', { 
+            fotos: [], 
+            filtrosActuales: {}, 
+            etiquetasSidebar: [] 
         });
     }
 };
 
 export const mostrarDetalleFoto = async (req, res) => {
     try {
-        const { id } = req.params;
-        const foto = await Publicacion.findByPk(id, {
+        const idFoto = req.params.id;
+        
+        if (isNaN(idFoto)) {
+            return res.status(404).send('Ruta no válida');
+        }
+
+        
+        const fotoEncontrada = await Publicacion.findByPk(idFoto, {
             include: [
+                { model: Usuario }, 
+                { model: Imagen, as: 'imagenes' },
+                { model: Etiqueta, as: 'etiquetas' },
+                
+                // Agregamos las relaciones
+                { model: Valoracion, as: 'valoraciones' },
                 { 
-                    model: Imagen, 
-                    as: 'imagenes',
-                    where: req.session.usuario ? {} : { licencia: 'sin_copyright' },
-                    required: false
-                },
-                {
-                    model: Usuario, 
-                    as: 'Usuario', 
-                    attributes: ['nombre_usuario'] 
-                },
-                {
-                    model: Valoracion,
-                    as: 'valoraciones'
-                },
-                {
-                    model: Comentarios,
-                    as: 'comentarios',
-                    include: [{ model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] }]
-                },
-                {
-                    model: Etiquetas,
-                    as: 'etiquetas'
+                    model: Comentarios, 
+                     as: 'comentarios',
+                     include: [{ model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] }]
                 }
             ],
             order: [
@@ -79,24 +58,20 @@ export const mostrarDetalleFoto = async (req, res) => {
             ]
         });
 
-        if (!foto) {
-            return res.render('index', {
-                usuario: req.session.usuario,
-                fotos: [], 
-                mensajeAlerta: { status: 'error', text: 'Foto no encontrada' }
-            });
+        if (!fotoEncontrada) {
+            return res.status(404).send('Foto no encontrada');
         }
 
-
+        // 🧮 MATEMÁTICA: Calculamos likes y promedios solo si existen
         let totalLikes = 0;
         let promedio = 0;
         let totalVotosPuntaje = 0;
         
-        if (foto.valoraciones && foto.valoraciones.length > 0) {
-            const likes = foto.valoraciones.filter(v => v.me_gusta === true);
+        if (fotoEncontrada.valoraciones && fotoEncontrada.valoraciones.length > 0) {
+            const likes = fotoEncontrada.valoraciones.filter(v => v.me_gusta === true);
             totalLikes = likes.length;
 
-            const puntajes = foto.valoraciones.filter(v => v.puntaje !== null);
+            const puntajes = fotoEncontrada.valoraciones.filter(v => v.puntaje !== null);
             if (puntajes.length > 0) {
                 totalVotosPuntaje = puntajes.length;
                 const suma = puntajes.reduce((acc, voto) => acc + voto.puntaje, 0);
@@ -104,26 +79,23 @@ export const mostrarDetalleFoto = async (req, res) => {
             }
         }
 
-        res.render('detalleFoto', { 
+        res.render('DetalleFoto', { 
             usuario: req.session.usuario,
-            foto: foto,
+            foto: fotoEncontrada,
             totalLikes,
             promedio,
             totalVotosPuntaje
         });
+
     } catch (error) {
-        console.error(error);
-        return res.render('index', {
-            usuario: req.session.usuario,
-            fotos: [],
-            mensajeAlerta: { status: 'error', text: 'Ocurrió un error al cargar la foto' }
-        });
+        console.error("Error al cargar el detalle de la foto:", error);
+        res.status(500).send('Error al cargar la publicación');
     }
 };
 
 export const mostrarFormularioNuevo = async (req,res)=>{
     try{
-        const etiquetasDisponibles = await Etiquetas.findAll();
+        const etiquetasDisponibles = await Etiqueta.findAll();
 
         res.render('nuevaFoto', {
             usuario: req.session.usuario,
@@ -145,7 +117,7 @@ export const crearPublicacion = async (req,res)=>{
         const usuarioId = req.session.usuario.id;
 
         if (!titulo || titulo.trim() === '') {
-            const todasLasEtiquetas = await Etiquetas.findAll(); 
+            const todasLasEtiquetas = await Etiqueta.findAll(); 
             return res.render('nuevaFoto', { 
                 etiquetas: todasLasEtiquetas,
                 mensajeAlerta: { status: 'error', text: 'El titulo es obligatorio' } 
@@ -153,7 +125,7 @@ export const crearPublicacion = async (req,res)=>{
         }
 
         if (!imagenes_base64 || imagenes_base64.length === 0) {
-            const todasLasEtiquetas = await Etiquetas.findAll();
+            const todasLasEtiquetas = await Etiqueta.findAll();
             return res.render('nuevaFoto', { 
                 etiquetas: todasLasEtiquetas,
                 mensajeAlerta: { status: 'error', text: 'Debes subir al menos una imagen valida' } 
@@ -193,7 +165,7 @@ export const crearPublicacion = async (req,res)=>{
             
             for (const nombreTag of arrayNuevas) {
                 if (nombreTag !== '') {
-                    const [etiquetaDB, created] = await Etiquetas.findOrCreate({
+                    const [etiquetaDB, created] = await Etiqueta.findOrCreate({
                         where: { nombre: nombreTag }
                     });
                     idsEtiquetasFinales.push(etiquetaDB.id);
@@ -210,7 +182,7 @@ export const crearPublicacion = async (req,res)=>{
     } catch (error) {
         console.error("Error al crear la publicacion", error);
         try{
-            const todasLasEtiquetas = await Etiquetas.findAll();
+            const todasLasEtiquetas = await Etiqueta.findAll();
             res.render('nuevaFoto', {
                 etiquetas: todasLasEtiquetas,
                 mensajeAlerta: { 
@@ -223,46 +195,37 @@ export const crearPublicacion = async (req,res)=>{
     }
 };
 
-export const darMeGusta = async (req, res) => {
+ export const darMeGusta = async (req, res) => {
+    const id_publicacion = req.params.id_publicacion; 
+
     try {
-        const { id_publicacion } = req.params;
         const usuarioId = req.session.usuario.id;
+        const foto = await Publicacion.findByPk(id_publicacion);
+
+        if (!foto || foto.usuario_id === usuarioId) {
+            return res.redirect(`/foto/${id_publicacion}`);
+        }
 
         const [voto, created] = await Valoracion.findOrCreate({
             where: { usuario_id: usuarioId, publicacion_id: id_publicacion },
-            defaults: { me_gusta: true }
+            defaults: { 
+                me_gusta: true,
+                puntaje: 5 
+            }
         });
 
         if (!created) {
             await voto.update({ me_gusta: !voto.me_gusta });
         }
 
-        res.redirect(req.get('referer') || '/');
-    } catch (error) {
-        console.error("Error en el Me gusta:", error);
-        res.redirect('/');
-    }
-};
 
-export const valorarPublicacion = async (req, res) => {
-    try {
-        const { id_publicacion } = req.params;
-        const { puntaje } = req.body;
-        const usuarioId = req.session.usuario.id;
-
-        const [voto, created] = await Valoracion.findOrCreate({
-            where: { usuario_id: usuarioId, publicacion_id: id_publicacion },
-            defaults: { puntaje: parseInt(puntaje) }
+        req.session.save(() => {
+            return res.redirect(`/foto/${id_publicacion}`);
         });
 
-        if (!created) {
-            await voto.update({ puntaje: parseInt(puntaje) });
-        }
-
-        res.redirect(req.get('referer') || '/');
     } catch (error) {
-        console.error("Error en la valoracion:", error);
-        res.redirect('/');
+        console.error("Error en el Me gusta:", error);
+        res.redirect(id_publicacion ? `/foto/${id_publicacion}` : '/'); 
     }
 };
 
@@ -274,6 +237,7 @@ export const agregarComentario = async (req, res) => {
 
         if (texto && texto.trim() !== '') {
             await Comentarios.create({
+                imagen_id: id_publicacion,
                 publicacion_id: id_publicacion,
                 usuario_id: usuarioId,
                 texto: texto
@@ -287,30 +251,145 @@ export const agregarComentario = async (req, res) => {
     }
 };
 
-export const denunciarPublicacion = async (req, res) => {
+export const eliminarComentario = async (req, res) => {
     try {
-        const { id_publicacion } = req.params;
-        const { motivo } = req.body;
+        const { id_comentario } = req.params;
         const usuarioId = req.session.usuario.id;
+        
+        const comentario = await Comentarios.findByPk(id_comentario);
 
-        const denunciaPrevia = await Denuncia.findOne({
-            where: {
-                publicacion_id: id_publicacion,
-                usuario_denunciante_id: usuarioId
+        if (comentario) {
+            const fotoId = comentario.publicacion_id;
+            
+            // validar usuario 
+            if (comentario.usuario_id === usuarioId) {
+                await comentario.destroy(); 
             }
-        });
-
-        if (!denunciaPrevia) {
-            await Denuncia.create({
-                publicacion_id: id_publicacion,
-                usuario_denunciante_id: usuarioId,
-                motivo: motivo
+            
+            return req.session.save((err) => {
+                if (err) {
+                    console.error("Error al guardar la sesión:", err);
+                }
+                res.redirect(`/foto/${fotoId}`);
             });
         }
 
-        res.redirect(req.get('referer') || '/');
+        req.session.save(() => {
+            res.redirect('/');
+        });
+        
     } catch (error) {
-        console.error("Error al denunciar:", error);
+        console.log("Error al borrar comentario:", error);
+        res.status(500).send("Error al borrar comentario");
+    }
+};
+
+export const mostrarPerfil = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const perfilUsuario = await Usuario.findByPk(id);
+
+        if (!perfilUsuario) {
+            return res.redirect('/'); 
+        }
+
+        const publicaciones = await Publicacion.findAll({
+            where: { usuario_id: id },
+            include: [
+                { model: Imagen, as: 'imagenes' },
+                { model: Etiqueta, as: 'etiquetas' }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
+
+        const fotosPlanas = publicaciones.map(foto => foto.toJSON());
+
+        res.render('perfil', {
+            usuario: req.session.usuario, 
+            dueñoPerfil: perfilUsuario,   
+            fotos: fotosPlanas,          
+            cantSeguidores: 0,
+            cantSeguidos: 0
+        });
+
+    } catch (error) {
+        console.error("Error al cargar el perfil:", error);
+        res.redirect('/');
+    }
+};
+
+
+export const mostrarFeedSeguidos = async (req, res) => {
+    try {
+        const mi_id = req.session.usuario.id;
+
+        const seguidos = await Seguidor.findAll({
+            where: { usuario_seguidor_id: mi_id },
+            attributes: ['usuario_seguido_id']
+        });
+
+        const idsSeguidos = seguidos.map(s => s.usuario_seguido_id);
+
+        if (idsSeguidos.length === 0) {
+            return res.render('feedSeguidos', {
+                usuario: req.session.usuario,
+                fotos: []
+            });
+        }
+
+        const publicacionesFeed = await Publicacion.findAll({
+            where: {
+                usuario_id: { [Op.in]: idsSeguidos },
+                estado: 'activa'
+            },
+            include: [
+                { model: Imagen, as: 'imagenes' },
+                { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] }
+            ],
+            order: [['fecha_publicacion', 'DESC']] 
+        });
+
+        res.render('feedSeguidos', {
+            usuario: req.session.usuario,
+            fotos: publicacionesFeed
+        });
+
+    } catch (error) {
+        console.error("Error al cargar el feed:", error);
+        res.redirect('/');
+    }
+};
+
+export const valorarPublicacion = async (req, res) => {
+    try {
+        const id_publicacion = req.params.id_publicacion; 
+        const usuarioId = req.session.usuario.id;
+        const { puntaje } = req.body;
+
+        const [voto, created] = await Valoracion.findOrCreate({
+            where: { 
+                usuario_id: usuarioId, 
+                publicacion_id: id_publicacion 
+            },
+            defaults: { 
+                puntaje: puntaje,
+                me_gusta: false
+            }
+        });
+
+        if (!created) {
+    
+            await voto.update({ puntaje: puntaje });
+        }
+
+        req.session.save((err) => {
+    if (err) {
+        console.error("Error al guardar la sesión:", err);
+    }
+    return res.redirect(req.get('referer') || '/');
+});
+    } catch (error) {
+        console.error("Error en la valoracion:", error);
         res.redirect('/');
     }
 };

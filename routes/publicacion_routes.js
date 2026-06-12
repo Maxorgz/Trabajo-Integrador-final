@@ -10,9 +10,9 @@ import { agregarComentario } from '../controllers/publicacionController.js';
 import { esValidador } from '../middlewares/auth.js';
 import { mostrarPerfil } from '../controllers/publicacionController.js';
 import { eliminarComentario } from '../controllers/publicacionController.js';
-import { realizarBusqueda } from '../controllers/publicacionController.js';
 import { toggleSeguir } from '../controllers/usuarioController.js';
 import { mostrarFeedSeguidos } from '../controllers/publicacionController.js';
+import { realizarBusqueda } from '../controllers/busquedaController.js';
 
 
 
@@ -30,8 +30,5 @@ router.post('/comentario/:id_comentario/eliminar', estaLogueado, eliminarComenta
 router.get('/buscar', realizarBusqueda);
 router.post('/usuario/:id/seguir', estaLogueado, toggleSeguir);
 router.get('/feed', estaLogueado, mostrarFeedSeguidos);
-
-
-
 
 export default router;
