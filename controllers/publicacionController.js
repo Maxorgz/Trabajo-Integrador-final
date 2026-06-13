@@ -95,7 +95,7 @@ export const mostrarDetalleFoto = async (req, res) => {
             }
         }
 
-        res.render('DetalleFoto', { 
+        res.render('detalleFoto', { 
             usuario: req.session.usuario,
             foto: fotoEncontrada,
             totalLikes,
