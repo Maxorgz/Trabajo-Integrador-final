@@ -14,7 +14,7 @@ import { eliminarComentario } from '../controllers/publicacionController.js';
 import { eliminarPublicacion } from '../controllers/publicacionController.js';
 import { mostrarFeedSeguidos } from '../controllers/publicacionController.js';
 import { realizarBusqueda } from '../controllers/busquedaController.js';
-
+import { misColecciones, crearColeccion, guardarEnColeccion, verColeccion } from '../controllers/coleccionController.js';
 
 
 const router = express.Router();
@@ -32,6 +32,10 @@ router.get('/buscar', realizarBusqueda);
 router.post('/perfil/:id/seguir', estaLogueado, alternarSeguir);
 router.get('/feed', estaLogueado, mostrarFeedSeguidos);
 router.post('/publicacion/:id/eliminar', eliminarPublicacion)
+router.get('/colecciones', estaLogueado, misColecciones);
+router.post('/colecciones/crear', estaLogueado, crearColeccion);
+router.post('/colecciones/guardar', estaLogueado, guardarEnColeccion);
+router.get('/colecciones/:id', estaLogueado, verColeccion);
 
 
 export default router;

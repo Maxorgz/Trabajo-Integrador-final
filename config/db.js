@@ -12,10 +12,11 @@ const sequelize = new Sequelize(
         timezone: '-03:00',
         logging: false,
         dialectOptions: {
-            ssl: {
+            /* ssl: {
                 require: true,
                 rejectUnauthorized: false
             }
+            */
         }
     }
 );
