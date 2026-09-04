@@ -1,4 +1,4 @@
-import { Seguidor, Usuario, Publicacion } from '../models/index.js';
+import { Seguidor, Usuario, Publicacion, Notificacion } from '../models/index.js';
 
 export const toggleSeguir = async (req, res) => {
     try {
@@ -24,10 +24,11 @@ export const toggleSeguir = async (req, res) => {
                 usuario_seguidor_id: mi_id,
                 usuario_seguido_id: usuario_a_seguir_id
             });
+            
             await Notificacion.create({
-                usuario_receptor_id: usuario_a_seguir_id,
-                usuario_generador_id: mi_id,
-                tipo_evento: 'seguidor',
+                usuario_id: usuario_a_seguir_id, 
+                actor_id: mi_id,                 
+                tipo: 'SEGUIDOR',              
                 publicacion_id: null
             });
         }
@@ -44,12 +45,12 @@ export const verNotificaciones = async (req, res) => {
         const usuarioId = req.session.usuario.id;
 
         const notificaciones = await Notificacion.findAll({
-            where: { usuario_receptor_id: usuarioId },
+            where: { usuario_id: usuarioId },
             include: [
-                { model: Usuario, as: 'Generador', attributes: ['nombre_usuario'] },
+                { model: Usuario, as: 'Actor', attributes: ['nombre_usuario'] },
                 { model: Publicacion, attributes: ['id', 'titulo'] }
             ],
-            order: [['fecha_notificacion', 'DESC']]
+            order: [['createdAt', 'DESC']] 
         });
 
         res.render('notificaciones', {
@@ -70,7 +71,7 @@ export const marcarNotificacionLeida = async (req, res) => {
 
         await Notificacion.update(
             { leida: true },
-            { where: { id: id, usuario_receptor_id: usuarioId } }
+            { where: { id: id, usuario_id: usuarioId } }
         );
 
         res.redirect('/notificaciones');

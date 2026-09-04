@@ -8,8 +8,8 @@ import Valoracion from './Valoracion.js';
 import Etiqueta from './Etiqueta.js';
 import Mensaje from './Mensaje.js';
 import Seguidor from './Seguidor.js';
-// 👉 1. IMPORTAR COLECCION (Como usaste "export class", va entre llaves)
 import { Coleccion } from './Coleccion.js';
+import { Notificacion } from './Notificacion.js';
 
 // Usuario 1-N Publicacion 
 Usuario.hasMany(Publicacion, { foreignKey: 'usuario_id', onDelete: 'CASCADE' });
@@ -81,6 +81,18 @@ Publicacion.belongsToMany(Coleccion, {
     timestamps: false 
 });
 
+// usuario 1-M
+Usuario.hasMany(Notificacion, { as: 'notificaciones_recibidas', foreignKey: 'usuario_id', onDelete: 'CASCADE' });
+Notificacion.belongsTo(Usuario, { as: 'Receptor', foreignKey: 'usuario_id' });
+
+Usuario.hasMany(Notificacion, { as: 'notificaciones_enviadas', foreignKey: 'actor_id', onDelete: 'CASCADE' });
+Notificacion.belongsTo(Usuario, { as: 'Actor', foreignKey: 'actor_id' });
+
+// publicacion 1-M
+Publicacion.hasMany(Notificacion, { foreignKey: 'publicacion_id', onDelete: 'CASCADE' });
+Notificacion.belongsTo(Publicacion, { foreignKey: 'publicacion_id' });
+
+
 export {
     sequelize,
     Usuario,
@@ -91,5 +103,6 @@ export {
     Etiqueta,
     Mensaje,
     Seguidor,
-    Coleccion 
+    Coleccion,
+    Notificacion 
 };
