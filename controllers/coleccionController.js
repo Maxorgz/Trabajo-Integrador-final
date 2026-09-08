@@ -46,21 +46,27 @@ export const guardarEnColeccion = async (req, res) => {
         const { coleccion_id, publicacion_id } = req.body;
 
         const coleccion = await Coleccion.findOne({
-            where: { id: coleccion_id, usuario_id: req.session.usuario.id }
+            where: { id: coleccion_id, usuario_id: req.session.usuario.id },
+            include: [{ model: Publicacion, as: 'publicaciones', attributes: ['id'] }]
         });
+        
         const publicacion = await Publicacion.findByPk(publicacion_id);
 
         if (coleccion && publicacion) {
-            const yaEstaGuardada = await coleccion.hasPublicacion(publicacion);
+            const yaEstaGuardada = coleccion.publicaciones.some(pub => pub.id === parseInt(publicacion_id));
+            
             if (!yaEstaGuardada) {
-                await coleccion.addPublicacion(publicacion);
-            }  
+                await coleccion.addPublicaciones([publicacion]);
+                req.session.mensajeFlash = `¡Foto guardada en ${coleccion.nombre}!`;
+            } else {
+                req.session.mensajeFlash = `Esta foto ya estaba en ${coleccion.nombre}.`;
+            }
         }
 
         res.redirect(req.get('referer') || '/');
     } catch (error) {
         console.error("Error al guardar en coleccion:", error);
-        res.redirect('/');
+        res.redirect(req.get('referer') || '/');
     }
 };
 

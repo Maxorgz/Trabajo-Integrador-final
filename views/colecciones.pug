@@ -1,0 +1,40 @@
+extends layout
+
+block metadata
+  title Mis Colecciones | Fotaza
+  script(src="https://cdn.tailwindcss.com")
+
+block content
+  div(class="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat bg-fixed py-6 sm:py-10 px-4 sm:px-6 lg:px-8")
+    
+    div(class="absolute inset-0 bg-gray-900/85 z-0")
+
+    div(class="relative z-10 max-w-screen-xl mx-auto")
+      
+      div(class="mb-8 flex items-center gap-4")
+        h1(class="text-3xl sm:text-4xl font-bold text-white tracking-wide drop-shadow-md m-0") 📁 Mis Colecciones
+
+      //- Formulario para crear nueva colección
+      div(class="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl mb-10 shadow-xl")
+        h2(class="text-lg text-gray-200 font-semibold mb-4") Crear nueva carpeta
+        form(action="/colecciones/crear" method="POST" class="flex flex-col sm:flex-row gap-4")
+          input(type="text" name="nombre" required placeholder="Ej: Viajes, Inspiración, Mascotas..." class="flex-1 px-4 py-3 bg-black/50 border border-white/20 text-white rounded-xl focus:ring-1 focus:ring-cyan-400 outline-none backdrop-blur-sm")
+          button(type="submit" class="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-cyan-500/30 whitespace-nowrap") + Crear Colección
+
+      //- Grilla de colecciones existentes
+      if colecciones && colecciones.length > 0
+        div(class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6")
+          each col in colecciones
+            a(href=`/coleccion/${col.id}` class="bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 hover:border-cyan-400 p-6 rounded-2xl transition-all group no-underline block shadow-lg hover:-translate-y-1")
+              div(class="text-5xl mb-4 group-hover:scale-110 transition-transform origin-bottom") 📂
+              h3(class="text-xl font-bold text-white mb-2 truncate")= col.nombre
+              p(class="text-cyan-400 text-sm font-medium m-0") 
+                if col.publicaciones
+                  | #{col.publicaciones.length} fotos
+                else
+                  | 0 fotos
+      else
+        div(class="w-full py-20 flex flex-col items-center justify-center bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl text-center px-4")
+          div(class="text-6xl mb-4 grayscale opacity-50") 📭
+          h3(class="text-2xl font-bold text-white mb-2") Aún no tienes colecciones
+          p(class="text-gray-400 max-w-md mx-auto") Usa el formulario de arriba para crear tu primera carpeta y empezar a guardar tus fotos favoritas.

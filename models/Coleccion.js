@@ -26,6 +26,6 @@ Coleccion.init(
   {
     sequelize, 
     modelName: 'colecciones',
-    timestamps:'true',
+    timestamps: false,
   },
 );

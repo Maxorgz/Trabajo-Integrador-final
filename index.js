@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import authRouter from './routes/auth.js';
 import rutasPublicacion from './routes/publicacion_routes.js';
+import { cargarNotificacionesGlobales } from './middlewares/notificaciones.js';
 import sequelize from './config/db.js';
 import session from 'express-session';
 
@@ -24,6 +25,8 @@ app.use(session({
     }
 }));
 
+app.use(cargarNotificacionesGlobales);
+
 //motor de plantillas
 app.set('view engine', 'pug');
 app.set('views', './views');
@@ -31,7 +34,6 @@ app.set('views', './views');
 //rutas
 app.use('/', rutasPublicacion);
 app.use('/auth', authRouter);
-
 
 //conexión a la base de datos
 sequelize.sync({ force: false })

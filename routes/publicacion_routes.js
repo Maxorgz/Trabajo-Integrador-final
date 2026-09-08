@@ -35,7 +35,7 @@ router.post('/publicacion/:id/eliminar', eliminarPublicacion)
 router.get('/colecciones', estaLogueado, misColecciones);
 router.post('/colecciones/crear', estaLogueado, crearColeccion);
 router.post('/colecciones/guardar', estaLogueado, guardarEnColeccion);
-router.get('/colecciones/:id', estaLogueado, verColeccion);
+router.get('/coleccion/:id', estaLogueado, verColeccion);
 router.get('/notificaciones', estaLogueado, verNotificaciones);
 router.post('/notificaciones/:id/leer', estaLogueado, marcarNotificacionLeida);
 

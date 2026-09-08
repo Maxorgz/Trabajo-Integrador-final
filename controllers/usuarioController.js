@@ -74,9 +74,9 @@ export const marcarNotificacionLeida = async (req, res) => {
             { where: { id: id, usuario_id: usuarioId } }
         );
 
-        res.redirect('/notificaciones');
+        res.redirect(req.get('referer') || '/');
     } catch (error) {
         console.error("Error al marcar como leida:", error);
-        res.redirect('/notificaciones');
+        res.redirect(req.get('referer') || '/');
     }
 };

@@ -1,4 +1,4 @@
-import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor } from '../models/index.js';
+import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor, Notificacion, Coleccion } from '../models/index.js';
 
 //----------------------------------------------------------------------------
 //home
@@ -95,12 +95,26 @@ export const mostrarDetalleFoto = async (req, res) => {
             }
         }
 
+        let coleccionesUsuario = [];
+        if (req.session.usuario) {
+            coleccionesUsuario = await Coleccion.findAll({ 
+                where: { usuario_id: req.session.usuario.id } 
+            });
+        }
+
+        const mensajeFlash = req.session.mensajeFlash;
+        if (mensajeFlash) {
+            delete req.session.mensajeFlash;
+        }
+
         res.render('detalleFoto', { 
             usuario: req.session.usuario,
             foto: fotoEncontrada,
             totalLikes,
             promedio,
-            totalVotosPuntaje
+            totalVotosPuntaje,
+            misColecciones: coleccionesUsuario,
+            mensajeFlash
         });
 
     } catch (error) {
@@ -281,14 +295,26 @@ export const agregarComentario = async (req, res) => {
                 usuario_id: usuarioId,
                 texto: texto
             });
-        }
 
-        res.redirect(req.get('referer') || '/');
+            const publicacion = await Publicacion.findByPk(id_publicacion);
+            
+            if (publicacion && publicacion.usuario_id !== usuarioId) {
+                await Notificacion.create({
+                    usuario_id: publicacion.usuario_id, 
+                    actor_id: usuarioId,                
+                    tipo: 'COMENTARIO',
+                    publicacion_id: publicacion.id
+                });
+            }
+        }
+        res.redirect(req.get('referer') || `/foto/${id_publicacion}`);
+        
     } catch (error) {
-        console.error("Error al comentar:", error);
+        console.error("Error al agregar comentario:", error);
         res.redirect('/');
     }
 };
+
 //-----------------------------------------------------------------------
 //eliminar comentarios
 export const eliminarComentario = async (req, res) => {
@@ -442,16 +468,29 @@ export const valorarPublicacion = async (req, res) => {
         });
 
         if (!created) {
-    
             await voto.update({ puntaje: puntaje });
+        }
+       
+        if (created) {
+            const publicacion = await Publicacion.findByPk(id_publicacion);
+            
+           
+            if (publicacion && publicacion.usuario_id !== usuarioId) {
+                await Notificacion.create({
+                    usuario_id: publicacion.usuario_id, 
+                    actor_id: usuarioId,               
+                    tipo: 'VALORACION',
+                    publicacion_id: publicacion.id
+                });
+            }
         }
 
         req.session.save((err) => {
-    if (err) {
-        console.error("Error al guardar la sesión:", err);
-    }
-    return res.redirect(req.get('referer') || '/');
-});
+            if (err) {
+                console.error("Error al guardar la sesión:", err);
+            }
+            return res.redirect(req.get('referer') || '/');
+        });
     } catch (error) {
         console.error("Error en la valoracion:", error);
         res.redirect('/');
@@ -464,9 +503,11 @@ export const alternarSeguir = async (req, res) => {
     try {
         const id_a_seguir = req.params.id;
         const mi_id = req.session.usuario.id;
+        
         if (id_a_seguir == mi_id) {
             return res.redirect('back'); 
         }
+        
         const relacion = await Seguidor.findOne({
             where: { 
                 usuario_seguidor_id: mi_id, 
@@ -480,6 +521,13 @@ export const alternarSeguir = async (req, res) => {
             await Seguidor.create({
                 usuario_seguidor_id: mi_id,
                 usuario_seguido_id: id_a_seguir
+            });
+
+            await Notificacion.create({
+                usuario_id: id_a_seguir,
+                actor_id: mi_id,        
+                tipo: 'SEGUIDOR',
+                publicacion_id: null    
             });
         }
 
