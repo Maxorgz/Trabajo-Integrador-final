@@ -54,7 +54,7 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
                     
                     div(class="p-4 border-b border-gray-800/50 hover:bg-white/5 transition-colors flex flex-col gap-2 group")
                       p(class="text-sm text-gray-300 m-0 leading-tight")
-                        strong(class="text-white") #{noti.Actor.nombre} #{noti.Actor.apellido}
+                      strong(class="text-white") #{noti.Actor.nombre_usuario} #{noti.Actor.apellido_usuario}
                         if noti.tipo === 'COMENTARIO'
                           |  comentó tu publicación. 💬
                         else if noti.tipo === 'VALORACION'

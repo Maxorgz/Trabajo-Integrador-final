@@ -1,4 +1,4 @@
-import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor, Notificacion, Coleccion } from '../models/index.js';
+import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor, Notificacion, Coleccion, Denuncia, DenunciaComentario } from '../models/index.js';
 
 //----------------------------------------------------------------------------
 //home
@@ -11,6 +11,7 @@ export const mostrarInicio = async (req, res) => {
             : { model: Etiqueta, as: 'etiquetas' };
 
         const opcionesBusqueda = {
+            where: { estado: 'activa' },
             include: [
                 { model: Imagen, as: 'imagenes' }, 
                 { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] },
@@ -243,7 +244,6 @@ export const crearPublicacion = async (req,res)=>{
             where: { usuario_id: usuarioId, publicacion_id: id_publicacion },
             defaults: { 
                 me_gusta: true,
-                puntaje: 5 
             }
         });
 
@@ -251,6 +251,15 @@ export const crearPublicacion = async (req,res)=>{
             await voto.update({ me_gusta: !voto.me_gusta });
         }
 
+        if (voto.me_gusta) {
+            await Notificacion.create({
+                usuario_id: foto.usuario_id,
+                actor_id: usuarioId,
+                publicacion_id: id_publicacion,
+                tipo: 'ME_GUSTA',
+                leida: false
+            });
+        }
 
         req.session.save(() => {
             return res.redirect(`/foto/${id_publicacion}`);
@@ -270,7 +279,7 @@ export const eliminarPublicacion = async (req, res) => {
         const publicacion = await Publicacion.findByPk(id);
 
         if (publicacion && publicacion.usuario_id === usuarioId) {
-            await publicacion.destroy(); // Esto la borra para siempre de PostgreSQL
+            await publicacion.destroy();
         }
         res.redirect(`/perfil/${usuarioId}`);
 
@@ -321,20 +330,24 @@ export const eliminarComentario = async (req, res) => {
     try {
         const { id_comentario } = req.params;
         const usuarioId = req.session.usuario.id;
-        
         const comentario = await Comentarios.findByPk(id_comentario);
 
         if (comentario) {
             const fotoId = comentario.publicacion_id;
+            const foto = await Publicacion.findByPk(fotoId);
+            const esAutorComentario = comentario.usuario_id === usuarioId;
+            const esDuenoFoto = foto && foto.usuario_id === usuarioId; 
             
-            // validar usuario 
-            if (comentario.usuario_id === usuarioId) {
+            if (esAutorComentario || esDuenoFoto) {
+                await DenunciaComentario.destroy({ 
+                    where: { comentario_id: id_comentario } 
+                });
                 await comentario.destroy(); 
             }
             
             return req.session.save((err) => {
                 if (err) {
-                    console.error("Error al guardar la sesión:", err);
+                    console.error("Error al guardar la sesion:", err);
                 }
                 res.redirect(`/foto/${fotoId}`);
             });
@@ -359,6 +372,7 @@ export const mostrarPerfil = async (req, res) => {
         if (!perfilUsuario) {
             return res.redirect('/'); 
         }
+        
         const publicaciones = await Publicacion.findAll({
             where: { usuario_id: id },
             include: [
@@ -371,15 +385,12 @@ export const mostrarPerfil = async (req, res) => {
         const cantSeguidores = await Seguidor.count({ where: { usuario_seguido_id: id } });
         const cantSeguidos = await Seguidor.count({ where: { usuario_seguidor_id: id } });
 
-       
         let esMiPerfil = false;
         let loSigo = false;
 
         if (req.session.usuario) {
-           
             esMiPerfil = req.session.usuario.id === parseInt(id);
             
-          
             if (!esMiPerfil) {
                 const relacion = await Seguidor.findOne({
                     where: {
@@ -391,6 +402,31 @@ export const mostrarPerfil = async (req, res) => {
             }
         }
 
+        let comentariosReportados = [];
+        if (esMiPerfil) {
+            const comentarios = await Comentarios.findAll({
+                include: [
+                    {
+                        model: Publicacion,
+                        where: { usuario_id: req.session.usuario.id }, 
+                        attributes: ['id'] 
+                    },
+                    {
+                        model: DenunciaComentario,
+                        as: 'denuncias', 
+                        required: true,  
+                        include: [{ model: Usuario, as: 'Denunciante', attributes: ['nombre_usuario', 'apellido_usuario'] }]
+                    },
+                    {
+                        model: Usuario,
+                        as: 'Usuario',
+                        attributes: ['nombre_usuario']
+                    }
+                ]
+            });
+            comentariosReportados = comentarios.map(c => c.toJSON());
+        }
+
         res.render('perfil', {
             usuario: req.session.usuario, 
             dueñoPerfil: perfilUsuario,   
@@ -398,7 +434,8 @@ export const mostrarPerfil = async (req, res) => {
             cantSeguidores,
             cantSeguidos,
             esMiPerfil, 
-            loSigo     
+            loSigo,
+            comentariosReportados 
         });
 
     } catch (error) {
@@ -455,6 +492,11 @@ export const valorarPublicacion = async (req, res) => {
         const id_publicacion = req.params.id_publicacion; 
         const usuarioId = req.session.usuario.id;
         const { puntaje } = req.body;
+        const publicacion = await Publicacion.findByPk(id_publicacion);
+        
+        if (!publicacion || publicacion.usuario_id === usuarioId) {
+            return res.redirect(req.get('referer') || '/');
+        }
 
         const [voto, created] = await Valoracion.findOrCreate({
             where: { 
@@ -463,7 +505,7 @@ export const valorarPublicacion = async (req, res) => {
             },
             defaults: { 
                 puntaje: puntaje,
-                me_gusta: false
+                me_gusta: false 
             }
         });
 
@@ -471,19 +513,13 @@ export const valorarPublicacion = async (req, res) => {
             await voto.update({ puntaje: puntaje });
         }
        
-        if (created) {
-            const publicacion = await Publicacion.findByPk(id_publicacion);
-            
-           
-            if (publicacion && publicacion.usuario_id !== usuarioId) {
-                await Notificacion.create({
-                    usuario_id: publicacion.usuario_id, 
-                    actor_id: usuarioId,               
-                    tipo: 'VALORACION',
-                    publicacion_id: publicacion.id
-                });
-            }
-        }
+        await Notificacion.create({
+            usuario_id: publicacion.usuario_id, 
+            actor_id: usuarioId,               
+            tipo: 'VALORACION',
+            publicacion_id: publicacion.id,
+            leida: false
+        });
 
         req.session.save((err) => {
             if (err) {
@@ -491,6 +527,7 @@ export const valorarPublicacion = async (req, res) => {
             }
             return res.redirect(req.get('referer') || '/');
         });
+        
     } catch (error) {
         console.error("Error en la valoracion:", error);
         res.redirect('/');
@@ -535,6 +572,57 @@ export const alternarSeguir = async (req, res) => {
 
     } catch (error) {
         console.error("Error al seguir/dejar de seguir:", error);
+        res.redirect('/');
+    }
+};
+//Denuncia
+export const denunciarPublicacion = async (req, res) => {
+    try {
+        const id_publicacion = req.params.id_publicacion;
+        const usuarioId = req.session.usuario.id;
+        const { motivo, justificacion } = req.body;
+        const publicacion = await Publicacion.findByPk(id_publicacion);
+
+        if (publicacion && publicacion.usuario_id !== usuarioId) {
+            await Denuncia.create({
+                motivo: motivo,
+                justificacion: justificacion,
+                publicacion_id: id_publicacion,
+                usuario_id: usuarioId, 
+                estado: 'pendiente' 
+            });
+            req.session.mensajeFlash = "Denuncia enviada para revision.";
+        }
+
+        res.redirect(`/foto/${id_publicacion}`);
+    } catch (error) {
+        console.error("Error al denunciar:", error);
+        res.redirect('/');
+    }
+};
+
+//denuncia comentario
+export const denunciarComentario = async (req, res) => {
+    try {
+        const { id_comentario } = req.params;
+        const usuarioId = req.session.usuario.id;
+        const { motivo, justificacion } = req.body;
+        const comentario = await Comentarios.findByPk(id_comentario);
+
+        if (comentario && comentario.usuario_id !== usuarioId) {
+            await DenunciaComentario.create({
+                motivo: motivo,
+                justificacion: justificacion,
+                comentario_id: id_comentario,
+                usuario_id: usuarioId,
+                estado: 'pendiente' 
+            });
+
+            req.session.mensajeFlash = "Comentario denunciado exitosamente.";
+        }
+        res.redirect(`/foto/${comentario.publicacion_id}`);
+    } catch (error) {
+        console.error("Error al denunciar comentario:", error);
         res.redirect('/');
     }
 };

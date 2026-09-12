@@ -1,0 +1,64 @@
+extends layout
+mixin tarjetaPublicacion(pub, esGrave)
+  div(class=`bg-gray-900 border ${esGrave ? 'border-red-900/50 shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]' : 'border-yellow-900/30'} rounded-2xl overflow-hidden flex flex-col`)
+    
+    //- Encabezado
+    div(class="p-4 border-b border-gray-800 flex justify-between items-center bg-black/30")
+      p(class="text-gray-300 font-bold text-sm") Autor: 
+        span(class="text-white") #{pub.Usuario.nombre_usuario} #{pub.Usuario.apellido_usuario}
+      span(class=`${esGrave ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'} px-3 py-1 rounded-full text-xs font-bold border`) #{pub.denuncias.length} Reportes
+
+    if pub.imagenes && pub.imagenes.length > 0
+      img(src=pub.imagenes[0].url_imagen alt="Foto reportada" class="w-full h-48 object-cover")
+    
+    //- Lista de Denuncias
+    div(class="p-4 flex-grow max-h-48 overflow-y-auto")
+      h3(class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3") Justificaciones:
+      div(class="flex flex-col gap-3")
+        each denuncia in pub.denuncias
+          div(class="bg-black/40 border border-gray-800 p-3 rounded-xl")
+            p(class="text-xs text-gray-500 mb-1") Por: #{denuncia.Denunciante.nombre_usuario}
+            p(class=`text-sm font-bold ${esGrave ? 'text-red-400' : 'text-yellow-400'} mb-1`) #{denuncia.motivo}
+            p(class="text-sm text-gray-300 italic") "#{denuncia.justificacion}"
+
+    //- Botones
+    div(class="p-4 bg-black/50 border-t border-gray-800 flex gap-3")
+      form(action=`/validador/publicacion/${pub.id}/rechazar` method="POST" class="flex-1")
+        button(type="submit" class="w-full py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl transition-colors text-sm") 👎 Desestimar
+      
+      form(action=`/validador/publicacion/${pub.id}/baja` method="POST" class="flex-1")
+        button(type="submit" class=`w-full py-2 text-white font-bold rounded-xl transition-all text-sm ${esGrave ? 'bg-red-600 hover:bg-red-500 shadow-lg' : 'bg-orange-600 hover:bg-orange-500'}`) 🚨 Dar de Baja
+
+//pantalla principal validador
+block content
+  div(class="max-w-6xl mx-auto px-4 py-8")
+    h1(class="text-3xl font-bold text-white mb-2 flex items-center gap-3") 
+      span 🛡️
+      | Panel de Validador
+    p(class="text-gray-400 mb-8") Gestión de publicaciones reportadas por la comunidad.
+
+    //3 denuncias
+    h2(class="text-xl font-bold text-red-500 mb-4 border-b border-red-500/30 pb-2 flex items-center gap-2") 
+      span 🚨
+      | Acción Inmediata (3+ Denuncias)
+    
+    if enPeligro.length === 0
+      div(class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center mb-10")
+        p(class="text-gray-400") No hay publicaciones críticas.
+    else
+      div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10")
+        each pub in enPeligro
+          +tarjetaPublicacion(pub, true)
+
+    //1 o 2 denuncias
+    h2(class="text-xl font-bold text-yellow-500 mb-4 border-b border-yellow-500/30 pb-2 flex items-center gap-2") 
+      span ⚠️
+      | En Observación (1 o 2 Denuncias)
+    
+    if enRevision.length === 0
+      div(class="bg-gray-900 border border-gray-800 rounded-2xl p-6 text-center")
+        p(class="text-gray-400") No hay publicaciones en observación.
+    else
+      div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+        each pub in enRevision
+          +tarjetaPublicacion(pub, false)

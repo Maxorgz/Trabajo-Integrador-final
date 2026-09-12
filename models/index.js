@@ -10,6 +10,8 @@ import Mensaje from './Mensaje.js';
 import Seguidor from './Seguidor.js';
 import { Coleccion } from './Coleccion.js';
 import { Notificacion } from './Notificacion.js';
+import Denuncia from './Denuncia.js';
+import DenunciaComentario from './DenunciaComentario.js';
 
 // Usuario 1-N Publicacion 
 Usuario.hasMany(Publicacion, { foreignKey: 'usuario_id', onDelete: 'CASCADE' });
@@ -92,6 +94,22 @@ Notificacion.belongsTo(Usuario, { as: 'Actor', foreignKey: 'actor_id' });
 Publicacion.hasMany(Notificacion, { foreignKey: 'publicacion_id', onDelete: 'CASCADE' });
 Notificacion.belongsTo(Publicacion, { foreignKey: 'publicacion_id' });
 
+// denuncias
+// usuario 1-M denuncias
+Usuario.hasMany(Denuncia, { foreignKey: 'usuario_id', as: 'denuncias_fotos' });
+Denuncia.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'Denunciante' });
+
+// publicacion 1-M denuncias
+Publicacion.hasMany(Denuncia, { foreignKey: 'publicacion_id', as: 'denuncias' });
+Denuncia.belongsTo(Publicacion, { foreignKey: 'publicacion_id' });
+
+//denuncia comentario
+Usuario.hasMany(DenunciaComentario, { foreignKey: 'usuario_id', as: 'denuncias_comentarios' });
+DenunciaComentario.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'Denunciante' });
+
+Comentarios.hasMany(DenunciaComentario, { foreignKey: 'comentario_id', as: 'denuncias' });
+DenunciaComentario.belongsTo(Comentarios, { foreignKey: 'comentario_id' });
+
 
 export {
     sequelize,
@@ -104,5 +122,7 @@ export {
     Mensaje,
     Seguidor,
     Coleccion,
-    Notificacion 
+    Notificacion,
+    Denuncia,
+    DenunciaComentario 
 };

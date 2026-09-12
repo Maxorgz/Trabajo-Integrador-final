@@ -1,13 +1,13 @@
 import express from 'express';
 import { mostrarInicio } from '../controllers/publicacionController.js';
 import { mostrarDetalleFoto } from '../controllers/publicacionController.js';
-import { estaLogueado } from '../middlewares/auth.js';
+import { estaLogueado, esValidador } from '../middlewares/auth.js';
 import { mostrarFormularioNuevo } from '../controllers/publicacionController.js';
 import { crearPublicacion } from '../controllers/publicacionController.js';
 import { darMeGusta } from '../controllers/publicacionController.js';
 import { valorarPublicacion } from '../controllers/publicacionController.js';
 import { agregarComentario } from '../controllers/publicacionController.js';
-import { esValidador } from '../middlewares/auth.js';
+import { mostrarPanel, rechazarDenuncias, darDeBaja } from '../controllers/validadorController.js';
 import { mostrarPerfil } from '../controllers/publicacionController.js';
 import { alternarSeguir } from '../controllers/publicacionController.js';
 import { eliminarComentario } from '../controllers/publicacionController.js';
@@ -15,7 +15,9 @@ import { eliminarPublicacion } from '../controllers/publicacionController.js';
 import { mostrarFeedSeguidos } from '../controllers/publicacionController.js';
 import { realizarBusqueda } from '../controllers/busquedaController.js';
 import { misColecciones, crearColeccion, guardarEnColeccion, verColeccion } from '../controllers/coleccionController.js';
-import { verNotificaciones, marcarNotificacionLeida, toggleSeguir } from '../controllers/usuarioController.js';
+import { verNotificaciones, marcarNotificacionLeida} from '../controllers/usuarioController.js';
+import { denunciarPublicacion } from '../controllers/publicacionController.js';
+import { denunciarComentario } from '../controllers/publicacionController.js';
 
 const router = express.Router();
 
@@ -38,5 +40,10 @@ router.post('/colecciones/guardar', estaLogueado, guardarEnColeccion);
 router.get('/coleccion/:id', estaLogueado, verColeccion);
 router.get('/notificaciones', estaLogueado, verNotificaciones);
 router.post('/notificaciones/:id/leer', estaLogueado, marcarNotificacionLeida);
+router.post('/publicacion/:id_publicacion/denunciar', denunciarPublicacion);
+router.get('/validador/panel', estaLogueado, esValidador, mostrarPanel);
+router.post('/validador/publicacion/:id_publicacion/rechazar', estaLogueado, esValidador, rechazarDenuncias);
+router.post('/validador/publicacion/:id_publicacion/baja', estaLogueado, esValidador, darDeBaja);
+router.post('/comentario/:id_comentario/denunciar', estaLogueado, denunciarComentario);
 
 export default router;
