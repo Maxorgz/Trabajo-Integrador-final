@@ -56,12 +56,34 @@ block content
             if foto.imagenes && foto.imagenes.length > 0
               
               if foto.imagenes.length > 1
-                button(onclick="cambiarImagen(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-20 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10094;
-                button(onclick="cambiarImagen(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-20 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10095;
+                button(onclick="cambiarImagen(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-30 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10094;
+                button(onclick="cambiarImagen(1)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/20 text-white w-12 h-12 rounded-full z-30 transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center text-xl hover:scale-110") &#10095;
               
               each imagen, index in foto.imagenes
-                div.carrusel-slide(class=`${index === 0 ? "activo" : ""} w-full h-full flex justify-center items-center absolute inset-0`)
-                  img(src=imagen.url_imagen alt=foto.titulo class="max-w-full max-h-full object-contain drop-shadow-2xl")
+                div.carrusel-slide(class=`${index === 0 ? "activo" : ""} w-full h-full flex justify-center items-center absolute inset-0 overflow-hidden`)
+                  img(src=imagen.url_imagen alt=foto.titulo class="max-w-full max-h-full object-contain drop-shadow-2xl z-10")
+                  
+                  //marca agua
+                  if imagen.marca_agua
+                    div(class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none select-none overflow-hidden")
+                      div(class="flex flex-col gap-12 sm:gap-24 w-[250%] transform rotate-[-35deg] opacity-60")
+                        
+                        //copy 1
+                        div(class="w-full bg-black/20 backdrop-blur-[2px] border-y border-white/10 py-3 text-center flex justify-center gap-10")
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                        
+                        //-copy 2 principal
+                        div(class="w-full bg-black/40 backdrop-blur-[4px] border-y-4 border-cyan-500/30 py-6 text-center flex justify-center gap-16")
+                          span(class="text-white text-4xl sm:text-6xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                          span(class="text-white text-4xl sm:text-6xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                            
+                        //copy 3
+                        div(class="w-full bg-black/20 backdrop-blur-[2px] border-y border-white/10 py-3 text-center flex justify-center gap-10")
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
+                          span(class="text-white text-2xl sm:text-4xl font-black uppercase tracking-widest drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] whitespace-nowrap") #{imagen.marca_agua}
 
           //comentario
           div(class="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 sm:p-8 shadow-2xl")
@@ -148,7 +170,12 @@ block content
             div(class="space-y-3")
               if usuario
                 if usuario.id !== foto.usuario_id
-                  
+                  //Boton Meinteresa y megusta
+                  form(action=`/publicacion/${foto.id}/me-interesa` method="POST" class="m-0 mb-4")
+                    button(type="submit" class="group w-full flex items-center justify-center gap-2 py-4 bg-white/10 hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 backdrop-blur-md border border-white/20 hover:border-transparent text-gray-300 hover:text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_-5px_rgba(249,115,22,0.8)] text-lg uppercase tracking-wide") 
+                      span(class="group-hover:scale-125 transition-all duration-300") 🤝
+                      | Me interesa esta foto
+
                   form(action=`/publicacion/${foto.id}/like` method="POST" class="m-0")
                     button(type="submit" class="w-full flex items-center justify-center gap-2 py-3 bg-white/10 hover:bg-cyan-500/80 backdrop-blur-md border border-white/20 hover:border-cyan-400 text-white font-semibold rounded-xl transition-all group shadow-lg") 
                       span(class="group-hover:scale-125 transition-transform") ❤️
@@ -198,8 +225,8 @@ block content
 
   div#modal-denuncia(class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4")
       div(class="bg-gray-900 border border-red-500/30 p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-[0_0_50px_-12px_rgba(239,68,68,0.3)]")
-        h3(class="text-xl font-bold text-red-400 mb-4 flex items-center gap-2") 
-          span 🚨
+        h3(class="group w-max text-xl font-bold text-red-400 mb-4 flex items-center gap-2 cursor-pointer") 
+          span(class="inline-block transform transition-all duration-300 group-hover:scale-150 group-hover:rotate-12") 🚨
           | Denunciar Publicación
         
         form(action=`/publicacion/${foto.id}/denunciar` method="POST" class="flex flex-col gap-4")

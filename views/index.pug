@@ -38,9 +38,15 @@ block content
       if fotos && fotos.length > 0
         each foto in fotos
           a(href=`/foto/${foto.id}` class="break-inside-avoid block mb-6 bg-gray-900 rounded-2xl overflow-hidden shadow-lg border border-gray-800 hover:border-cyan-500 hover:shadow-cyan-500/20 hover:-translate-y-1 transition-all duration-300 no-underline")
-            div.contenedor-imagen
+            div.contenedor-imagen(class="relative")
               if foto.imagenes && foto.imagenes.length > 0
                 img(src=foto.imagenes[0].url_imagen alt=foto.titulo class="w-full h-auto block")
+                
+                //etiqueta de copyright
+                if foto.imagenes[0].licencia === 'copyright'
+                  div(class="absolute top-3 right-3 bg-black/70 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg")
+                    span 🛡️
+                    span Copyright
               else
                 div(class="w-full h-48 bg-gray-800 flex items-center justify-center text-gray-500") Sin imagen
 
@@ -51,7 +57,7 @@ block content
               if foto.etiquetas && foto.etiquetas.length > 0
                 div(class="mt-4 flex flex-wrap gap-2")
                   each etiqueta in foto.etiquetas
-                    span(class="px-2.5 py-1 bg-cyan-900//30 border border-cyan-500/30 text-cyan-400 text-xs font-semibold rounded-lg shadow-sm") ##{etiqueta.nombre}
+                    span(class="px-2.5 py-1 bg-cyan-900/30 border border-cyan-500/30 text-cyan-400 text-xs font-semibold rounded-lg shadow-sm") ##{etiqueta.nombre}
       else
         div(class="w-full text-center p-12 text-gray-400 bg-gray-900/50 rounded-2xl border border-gray-800 break-inside-avoid")
           h2(class="text-xl font-semibold text-white mb-2") No hay resultados

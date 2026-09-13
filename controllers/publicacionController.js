@@ -1,4 +1,4 @@
-import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor, Notificacion, Coleccion, Denuncia, DenunciaComentario } from '../models/index.js';
+import { Publicacion, Imagen, Usuario, Etiqueta, Valoracion, Comentarios, Seguidor, Notificacion, Coleccion, Denuncia, DenunciaComentario, Mensaje } from '../models/index.js';
 
 //----------------------------------------------------------------------------
 //home
@@ -6,14 +6,20 @@ export const mostrarInicio = async (req, res) => {
     try {
         const { categoria, orden } = req.query;
         const orderOption = orden === 'antiguas' ? [['createdAt', 'ASC']] : [['createdAt', 'DESC']];
+        
         const includeEtiqueta = categoria 
             ? { model: Etiqueta, as: 'etiquetas', where: { nombre: categoria }, required: true }
             : { model: Etiqueta, as: 'etiquetas' };
 
+        // usuario no registrado no ve copy
+        const includeImagen = req.session.usuario 
+            ? { model: Imagen, as: 'imagenes' }
+            : { model: Imagen, as: 'imagenes', where: { licencia: 'sin_copyright' }, required: true };
+
         const opcionesBusqueda = {
             where: { estado: 'activa' },
             include: [
-                { model: Imagen, as: 'imagenes' }, 
+                includeImagen, 
                 { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] },
                 includeEtiqueta
             ],
@@ -39,7 +45,7 @@ export const mostrarInicio = async (req, res) => {
         });
         
     } catch (error) {
-        console.error("Error cargando la galería:", error);
+        console.error("Error cargando la galeria:", error);
         res.render('index', { 
             usuario: req.session?.usuario || null,
             fotos: [], 
@@ -146,7 +152,8 @@ export const mostrarFormularioNuevo = async (req,res)=>{
 //Crear publicacion
 export const crearPublicacion = async (req,res)=>{
     try{
-        const { titulo, descripcion, tiene_copyright, imagenes_base64, etiquetas, nuevas_etiquetas } = req.body;
+        //marca agua
+        const { titulo, descripcion, tiene_copyright, marca_agua, imagenes_base64, etiquetas, nuevas_etiquetas } = req.body;
         const usuarioId = req.session.usuario.id;
 
         if (!titulo || titulo.trim() === '') {
@@ -165,7 +172,6 @@ export const crearPublicacion = async (req,res)=>{
             });
         }
 
-
         const nuevaPublicacion = await Publicacion.create({
             usuario_id: usuarioId,
             titulo: titulo,
@@ -175,14 +181,18 @@ export const crearPublicacion = async (req,res)=>{
 
         const arrayImagenes = Array.isArray(imagenes_base64) ? imagenes_base64 : [imagenes_base64];
 
-        const aplicarMarca = tiene_copyright === 'si' ? 'watermark_logo.png' : null;
+        //checkbox on
+        const esCopyright = tiene_copyright === 'on';
+        
+        //por defecto pone marca de agua 
+        const textoMarcaAgua = esCopyright ? (marca_agua && marca_agua.trim() !== '' ? marca_agua : '© Protegido por Copyright') : null;
 
         for (const base64Texto of arrayImagenes) {
             await Imagen.create({
                 publicacion_id: nuevaPublicacion.id,
                 url_imagen: base64Texto,
-                licencia: tiene_copyright === 'si' ? 'copyright' : 'sin_copyright',
-                marca_agua: aplicarMarca
+                licencia: esCopyright ? 'copyright' : 'sin_copyright',
+                marca_agua: textoMarcaAgua
             });
         }
 
@@ -626,3 +636,38 @@ export const denunciarComentario = async (req, res) => {
         res.redirect('/');
     }
 };
+
+export const meInteresa = async (req, res) => {
+    try {
+        const publicacion_id = req.params.id;
+        const interesado_id = req.session.usuario.id;
+        const foto = await Publicacion.findByPk(publicacion_id);
+
+        if (!foto || foto.usuario_id === interesado_id) {
+            return res.redirect('back'); // Si la foto no existe o es mía, reboto
+        }
+
+        const autor_id = foto.usuario_id;
+        const mensajePrevio = await Mensaje.findOne({
+            where: {
+                emisor_id: interesado_id,
+                receptor_id: autor_id,
+                publicacion_id: publicacion_id
+            }
+        });
+
+        if (!mensajePrevio) {
+            await Mensaje.create({
+                emisor_id: interesado_id,
+                receptor_id: autor_id,
+                publicacion_id: publicacion_id,
+                texto: "¡Hola! Me interesa esta imagen. ¿Podemos llegar a un acuerdo?"
+            });
+        }
+        res.redirect('/mis-mensajes'); 
+
+    } catch (error) {
+        console.error("Error al enviar Me interesa:", error);
+        res.redirect('back');
+    }
+}

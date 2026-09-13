@@ -1,6 +1,6 @@
 import express from 'express';
 import { mostrarInicio } from '../controllers/publicacionController.js';
-import { mostrarDetalleFoto } from '../controllers/publicacionController.js';
+import { mostrarDetalleFoto, meInteresa } from '../controllers/publicacionController.js';
 import { estaLogueado, esValidador } from '../middlewares/auth.js';
 import { mostrarFormularioNuevo } from '../controllers/publicacionController.js';
 import { crearPublicacion } from '../controllers/publicacionController.js';
@@ -18,6 +18,7 @@ import { misColecciones, crearColeccion, guardarEnColeccion, verColeccion } from
 import { verNotificaciones, marcarNotificacionLeida} from '../controllers/usuarioController.js';
 import { denunciarPublicacion } from '../controllers/publicacionController.js';
 import { denunciarComentario } from '../controllers/publicacionController.js';
+import { mostrarMensajes, responderMensaje } from '../controllers/mensajeController.js';
 
 const router = express.Router();
 
@@ -45,5 +46,7 @@ router.get('/validador/panel', estaLogueado, esValidador, mostrarPanel);
 router.post('/validador/publicacion/:id_publicacion/rechazar', estaLogueado, esValidador, rechazarDenuncias);
 router.post('/validador/publicacion/:id_publicacion/baja', estaLogueado, esValidador, darDeBaja);
 router.post('/comentario/:id_comentario/denunciar', estaLogueado, denunciarComentario);
-
+router.post('/publicacion/:id/me-interesa', meInteresa);
+router.get('/mis-mensajes', mostrarMensajes);
+router.post('/mis-mensajes/responder', responderMensaje);
 export default router;

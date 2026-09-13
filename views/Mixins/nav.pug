@@ -1,21 +1,19 @@
 nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b border-gray-800 shadow-sm")
   div(class="max-w-screen-2xl mx-auto px-4 lg:px-8")
     
+    //principal
     div(class="flex justify-between items-center h-16 gap-4")
       
-      // Logo e Inicio
+      //inicio y logo
       div(class="flex items-center gap-8 shrink-0")
-        a(href="/" class="flex items-center gap-2 group decoration-none")
+        a(href="/" class="flex items-center gap-3 group no-underline")
           div(class="bg-cyan-500/10 p-2 rounded-lg text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-all duration-300 shadow-[0_0_15px_-3px_rgba(6,182,212,0.3)]")
             svg(class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z")
-          span(class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent tracking-wide") Fotaza
-        
-        div(class="flex items-center gap-6")
-          a(href="/" class="text-gray-300 hover:text-cyan-400 text-sm font-medium transition-colors no-underline whitespace-nowrap") Inicio
+          span(class="text-2xl font-bold text-white tracking-wide group-hover:text-cyan-400 transition-colors duration-300") Fotaza
 
-      // Buscador
+      //buscador
       div(class="flex-1 max-w-2xl min-w-[250px] hidden md:block")
         form(action="/buscar" method="GET" class="flex items-center w-full bg-gray-900/50 border border-gray-700 focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500 rounded-full overflow-hidden transition-all shadow-inner")
           select(name="tipo" class="bg-transparent text-gray-400 hover:text-gray-300 text-sm font-medium py-2 pl-4 pr-2 border-r border-gray-600 outline-none cursor-pointer focus:ring-0 appearance-none")
@@ -26,32 +24,32 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
             svg(class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z")
 
+      //usuario y acciones 
       div(class="flex items-center gap-2 sm:gap-4 shrink-0")
         if usuario
           
-          // coleccion
-          a(href="/colecciones" class="text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors no-underline flex items-center gap-2" title="Mis Colecciones")
-            span(class="text-xl") 📁
-            span(class="hidden xl:inline text-sm font-medium") Colecciones
+          //coleccion
+          a(href="/colecciones" class="text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group no-underline" title="Mis Colecciones")
+            span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 📁
 
-          div(class="relative")
-            
-            button(type="button" onclick="document.getElementById('menu-notificaciones').classList.toggle('hidden')" class="relative text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 mr-2 cursor-pointer focus:outline-none")
-              span(class="text-xl") 🔔
-          
+          //mensaje
+          a(href="/mis-mensajes" class="text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group no-underline" title="Mis Mensajes")
+            span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 📬
+
+          //notificacion
+          div(class="relative flex items-center")
+            button(type="button" onclick="document.getElementById('menu-notificaciones').classList.toggle('hidden')" class="relative text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group cursor-pointer focus:outline-none" title="Notificaciones")
+              span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 🔔
               if notificacionesGlobales && notificacionesGlobales.length > 0
                 span(class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse")
             
             div#menu-notificaciones(class="hidden absolute right-0 mt-3 w-80 bg-[#0B0F19]/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl overflow-hidden z-50 transform origin-top-right transition-all")
-              
               div(class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/50")
                 h3(class="text-white font-bold m-0 text-sm") Notificaciones Nuevas
               
-              //tipos de notificacion
               div(class="max-h-80 overflow-y-auto")
                 if notificacionesGlobales && notificacionesGlobales.length > 0
                   each noti in notificacionesGlobales
-                    
                     div(class="p-4 border-b border-gray-800/50 hover:bg-white/5 transition-colors flex flex-col gap-2 group")
                       p(class="text-sm text-gray-300 m-0 leading-tight")
                       strong(class="text-white") #{noti.Actor.nombre_usuario} #{noti.Actor.apellido_usuario}
@@ -63,26 +61,24 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
                           |  le dio "Me gusta" a tu foto. ❤️
                         else if noti.tipo === 'SEGUIDOR'
                           |  comenzo a seguirte. 👤
-
+                        
                       
                       div(class="flex justify-between items-center mt-1")
                         span(class="text-xs text-gray-500") Hace un momento
-                        
                         form(action=`/notificaciones/${noti.id}/leer` method="POST" class="m-0")
                           button(type="submit" class="text-xs text-cyan-500 hover:text-cyan-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity") Marcar leída
-                
                 else
                   div(class="p-8 text-center flex flex-col items-center justify-center")
                     span(class="text-3xl grayscale opacity-40 mb-2") 📭
                     span(class="text-gray-400 text-sm") No hay notificaciones nuevas
 
-          //- Nueva Foto
-          a(href="/nuevaFoto" class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 hover:border-cyan-500 text-white text-sm font-medium rounded-lg transition-all shadow-sm no-underline whitespace-nowrap")
-            svg(class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24")
+          //nueva foto
+          a(href="/nuevaFoto" class="text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group no-underline gap-1 ml-1" title="Subir Nueva Foto")
+            svg(class="w-4 h-4 text-cyan-400 transform group-hover:scale-125 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24")
               path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4")
-            span(class="hidden sm:inline") Nueva Foto
+            span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 📷
           
-          //- Perfil y Logout
+          //perfil y cerrar sesion
           div(class="flex items-center gap-3 pl-3 sm:pl-5 ml-1 sm:ml-2 border-l border-gray-700")
             a(href=`/perfil/${usuario.id}` class="flex items-center gap-3 group no-underline cursor-pointer")
               span(class="hidden lg:inline text-sm font-medium text-gray-300 whitespace-nowrap") Hola, 

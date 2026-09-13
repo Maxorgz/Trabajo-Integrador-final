@@ -4,17 +4,14 @@ block metadata
   title Subir Nueva Foto
   script(src="https://cdn.tailwindcss.com")
 block content 
-  //- Contenedor principal
+  //principal
   div(class="w-full flex justify-center py-1")
-    
     
     div(class="w-full max-w-2xl bg-white p-8 rounded-lg shadow-xl relative")
       div(class="absolute top-3 right-5 pt-3 pr-3")
           a(href="/" style="color: inherit; text-decoration: none;" title="Cerrar")
            svg(width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg")
               path(fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z")
-
-
 
       p.text-4xl.font-bold.text-gray-800.text-center.mb-8 Compartir nueva foto
        
@@ -37,7 +34,7 @@ block content
         div(class="flex flex-col mt-2")
           label(class="font-bold text-gray-700") Etiquetas (Selecciona al menos una):
           
-          //- Contenedor de etiquetas
+          //etiqueta
           div(class="flex gap-3 flex-wrap mt-2")
             if etiquetas
               each etiqueta in etiquetas
@@ -49,13 +46,27 @@ block content
           label(for="nuevas_etiquetas" class="font-bold text-gray-700 mb-1") Ingresar etiquetas (separadas por coma):
           input(type="text" name="nuevas_etiquetas" id="nuevas_etiquetas" placeholder="Ej: Etiqueta1, Etiqueta2" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500")
 
+        //copyright
+        div(class="flex flex-col mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm")
+          label(class="flex items-center gap-3 cursor-pointer group w-max")
+            input(type="checkbox" id="check-copyright" name="tiene_copyright" class="w-5 h-5 accent-purple-600 cursor-pointer rounded focus:ring-purple-500")
+            span(class="text-gray-800 font-bold group-hover:text-purple-700 transition-colors") 🛡️ Proteger imagen con Copyright
+          
+          div(id="caja-marca-agua" class="hidden mt-4 pt-4 border-t border-purple-200")
+            label(class="block font-bold text-gray-700 mb-1") Texto de la marca de agua (Opcional):
+            input(type="text" name="marca_agua" placeholder="Ej: © 2026 Fotaza - Prohibida su copia" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white")
+            p(class="text-xs text-gray-500 mt-2 flex items-center gap-1") 
+              span 💡
+              | Si marcas la casilla de Copyright, solo los usuarios registrados podrán verla.
+
         div#contenedor_base64
 
-        //- Botón de envío
+        //boton envio
         button(type="submit" class="mt-4 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-4 rounded-md transition shadow-lg cursor-pointer") Publicar Foto
 
 block scripts
   script.
+    // logica base64
     const inputFotos = document.getElementById('fotos_locales');
     const contenedorBase64 = document.getElementById('contenedor_base64');
 
@@ -72,4 +83,15 @@ block scripts
         };
         reader.readAsDataURL(archivo);
       });  
+    });
+
+    //logica marca de agua
+    document.getElementById('check-copyright').addEventListener('change', function() {
+      const caja = document.getElementById('caja-marca-agua');
+      if (this.checked) {
+        caja.classList.remove('hidden');
+      } else {
+        caja.classList.add('hidden');
+        document.querySelector('input[name="marca_agua"]').value = '';
+      }
     });

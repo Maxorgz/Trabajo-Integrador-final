@@ -89,6 +89,15 @@ export const iniciarSesion = async (req, res) => {
             });
         }
 
+        if (usuario.estado === 'inactivo') {
+            return res.render('login', {
+                mensajeAlerta: {
+                    status: 'error',
+                    text: 'Tu cuenta ha sido suspendida permanentemente por violar las normas de la comunidad.'
+                }
+            });
+        }
+
         const contraseniaValida = password === usuario.password;
 
         if (!contraseniaValida) {

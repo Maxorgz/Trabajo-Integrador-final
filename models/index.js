@@ -110,6 +110,17 @@ DenunciaComentario.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'Denuncian
 Comentarios.hasMany(DenunciaComentario, { foreignKey: 'comentario_id', as: 'denuncias' });
 DenunciaComentario.belongsTo(Comentarios, { foreignKey: 'comentario_id' });
 
+//mensaje
+Usuario.hasMany(Mensaje, { foreignKey: 'emisor_id', as: 'MensajesEnviados' });
+Mensaje.belongsTo(Usuario, { foreignKey: 'emisor_id', as: 'Emisor' });
+
+// usuario 1:M mensaje
+Usuario.hasMany(Mensaje, { foreignKey: 'receptor_id', as: 'MensajesRecibidos' });
+Mensaje.belongsTo(Usuario, { foreignKey: 'receptor_id', as: 'Receptor' });
+
+// mensaje:foto
+Publicacion.hasMany(Mensaje, { foreignKey: 'publicacion_id', as: 'Mensajes' });
+Mensaje.belongsTo(Publicacion, { foreignKey: 'publicacion_id', as: 'PublicacionRelacionada' });
 
 export {
     sequelize,

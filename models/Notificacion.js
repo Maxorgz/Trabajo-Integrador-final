@@ -18,3 +18,5 @@ Notificacion.init(
     timestamps: true,
   }
 );
+
+export default Notificacion;
