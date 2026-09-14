@@ -19,6 +19,7 @@ import { verNotificaciones, marcarNotificacionLeida} from '../controllers/usuari
 import { denunciarPublicacion } from '../controllers/publicacionController.js';
 import { denunciarComentario } from '../controllers/publicacionController.js';
 import { mostrarMensajes, responderMensaje } from '../controllers/mensajeController.js';
+import { mostrarEditar, guardarEdicion } from '../controllers/publicacionController.js';
 
 const router = express.Router();
 
@@ -49,4 +50,6 @@ router.post('/comentario/:id_comentario/denunciar', estaLogueado, denunciarComen
 router.post('/publicacion/:id/me-interesa', meInteresa);
 router.get('/mis-mensajes', mostrarMensajes);
 router.post('/mis-mensajes/responder', responderMensaje);
+router.get('/publicacion/:id/editar', mostrarEditar);
+router.post('/publicacion/:id/editar', guardarEdicion);
 export default router;

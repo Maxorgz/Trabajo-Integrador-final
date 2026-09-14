@@ -32,12 +32,12 @@ export const meInteresa = async (req, res) => {
                 texto: `Hola, estoy interesado en tu publicación "${publicacion.titulo}".`
             });
             
-            // Notificación dueño
             await Notificacion.create({
-                usuario_receptor_id: publicacion.usuario_id,
-                usuario_generador_id: interesadoId,
-                tipo_evento: 'interes',
-                publicacion_id: id_publicacion
+                usuario_id: publicacion.usuario_id,
+                actor_id: interesadoId,
+                tipo: 'ME_INTERESA',
+                publicacion_id: id_publicacion,
+                leida: false
             });
         }
 
@@ -61,8 +61,8 @@ export const mostrarMensajes = async (req, res) => {
                 ]
             },
             include: [
-                { model: Usuario, as: 'Emisor', attributes: ['id', 'nombre_usuario'] },
-                { model: Usuario, as: 'Receptor', attributes: ['id', 'nombre_usuario'] },
+                { model: Usuario, as: 'Emisor', attributes: ['id', 'nombre_usuario', 'apellido_usuario'] },
+                { model: Usuario, as: 'Receptor', attributes: ['id', 'nombre_usuario', 'apellido_usuario'] },
                 { 
                     model: Publicacion, 
                     as: 'PublicacionRelacionada', 
@@ -94,7 +94,7 @@ export const mostrarMensajes = async (req, res) => {
             if (!conversacionesMap[key]) {
                 conversacionesMap[key] = {
                     otroUsuario: otroUsuario,
-                    publicacion: msg.PublicacionRelacionada || msg.publicacionRelacionada, // Blindaje extra
+                    publicacion: msg.PublicacionRelacionada || msg.publicacionRelacionada,
                     mensajes: []
                 };
             }
@@ -125,12 +125,12 @@ export const responderMensaje = async (req, res) => {
                 texto: texto
             });
             
-            // Notificamos
             await Notificacion.create({
-                usuario_receptor_id: receptor_id,
-                usuario_generador_id: emisor_id,
-                tipo_evento: 'mensaje',
-                publicacion_id: publicacion_id || null
+                usuario_id: receptor_id,
+                actor_id: emisor_id,
+                tipo: 'MENSAJE',
+                publicacion_id: publicacion_id || null,
+                leida: false
             });
         }
         res.redirect('/mis-mensajes');

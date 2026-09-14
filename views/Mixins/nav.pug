@@ -38,12 +38,28 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
 
           //notificacion
           div(class="relative flex items-center")
-            button(type="button" onclick="document.getElementById('menu-notificaciones').classList.toggle('hidden')" class="relative text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group cursor-pointer focus:outline-none" title="Notificaciones")
-              span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 🔔
-              if notificacionesGlobales && notificacionesGlobales.length > 0
-                span(class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse")
             
-            div#menu-notificaciones(class="hidden absolute right-0 mt-3 w-80 bg-[#0B0F19]/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl overflow-hidden z-50 transform origin-top-right transition-all")
+            if notificacionesGlobales && notificacionesGlobales.length > 0
+              - const maxNotiId = Math.max(...notificacionesGlobales.map(n => n.id))
+              
+              button(type="button" onclick=`document.getElementById('menu-notificaciones').classList.toggle('hidden'); localStorage.setItem('ultimaNotiVista', '${maxNotiId}'); document.getElementById('punto-rojo').style.display='none';` class="relative text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group cursor-pointer focus:outline-none" title="Notificaciones")
+                span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 🔔
+                span#punto-rojo(class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse")
+              
+              script.
+                document.addEventListener('DOMContentLoaded', () => {
+                  const ultimaVista = localStorage.getItem('ultimaNotiVista');
+                  if (ultimaVista && parseInt(ultimaVista) >= #{maxNotiId}) {
+                    const punto = document.getElementById('punto-rojo');
+                    if (punto) punto.style.display = 'none';
+                  }
+                });
+                
+            else
+              button(type="button" onclick="document.getElementById('menu-notificaciones').classList.toggle('hidden')" class="relative text-gray-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center group cursor-pointer focus:outline-none" title="Notificaciones")
+                span(class="text-xl inline-block group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300") 🔔
+
+            div#menu-notificaciones(class="hidden absolute top-full right-0 mt-4 w-80 bg-[#0B0F19]/95 backdrop-blur-xl border border-gray-700 rounded-2xl shadow-2xl overflow-hidden z-50 transform origin-top-right transition-all")
               div(class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/50")
                 h3(class="text-white font-bold m-0 text-sm") Notificaciones Nuevas
               
@@ -60,11 +76,12 @@ nav(class="sticky top-0 z-50 w-full bg-[#0B0F19]/80 backdrop-blur-md border-b bo
                         else if noti.tipo === 'ME_GUSTA'
                           |  le dio "Me gusta" a tu foto. ❤️
                         else if noti.tipo === 'SEGUIDOR'
-                          |  comenzo a seguirte. 👤
-                        
+                          |  comenzó a seguirte. 👤
+                        else if noti.tipo === 'ME_INTERESA'
+                          |  está interesado en tu foto. 🤝
                       
                       div(class="flex justify-between items-center mt-1")
-                        span(class="text-xs text-gray-500") Hace un momento
+                        span(class="text-xs text-gray-500 capitalize") #{new Date(noti.createdAt).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' a las')}
                         form(action=`/notificaciones/${noti.id}/leer` method="POST" class="m-0")
                           button(type="submit" class="text-xs text-cyan-500 hover:text-cyan-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity") Marcar leída
                 else

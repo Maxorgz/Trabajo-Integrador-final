@@ -27,7 +27,7 @@ block content
                 div(class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 flex items-center justify-center text-white font-bold shadow-md shrink-0")
                   | #{chat.otroUsuario.nombre_usuario.charAt(0).toUpperCase()}
                 div(class="overflow-hidden flex-1")
-                  h4(class="text-white font-bold text-sm m-0 truncate") #{chat.otroUsuario.nombre_usuario}
+                  h4(class="text-white font-bold text-sm m-0 truncate capitalize") #{chat.otroUsuario.nombre_usuario} #{chat.otroUsuario.apellido_usuario}
                   if chat.publicacion
                     p(class="text-gray-400 text-xs m-0 truncate mt-1") 📸 #{chat.publicacion.titulo}
 
@@ -45,7 +45,7 @@ block content
                     | #{chat.otroUsuario.nombre_usuario.charAt(0).toUpperCase()}
                   div
                     p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold m-0") Charlando con
-                    h3(class="text-white font-bold text-lg m-0 mt-0.5") #{chat.otroUsuario.nombre_usuario}
+                    h3(class="text-white font-bold text-lg m-0 mt-0.5 capitalize") #{chat.otroUsuario.nombre_usuario} #{chat.otroUsuario.apellido_usuario}
               
               //histial
               div(class="p-6 flex-1 overflow-y-auto flex flex-col gap-4 bg-black/40")
@@ -72,7 +72,7 @@ block content
                       p(class="text-sm m-0 leading-relaxed")= msj.texto
                       span(class="text-[10px] text-cyan-200 block mt-2 text-right font-semibold tracking-wider") #{new Date(msj.fecha_envio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   else
-                    //- Mensaje de la otra persona
+                    //Mensaje de la otra persona
                     div(class="self-start bg-gray-800 border border-gray-600/50 text-white p-4 rounded-2xl rounded-tl-sm max-w-[80%] sm:max-w-[70%] shadow-md")
                       p(class="text-sm m-0 leading-relaxed text-gray-200")= msj.texto
                       span(class="text-[10px] text-gray-400 block mt-2 font-semibold tracking-wider") #{new Date(msj.fecha_envio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}

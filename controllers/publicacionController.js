@@ -20,7 +20,7 @@ export const mostrarInicio = async (req, res) => {
             where: { estado: 'activa' },
             include: [
                 includeImagen, 
-                { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] },
+                { model: Usuario, as: 'Usuario', attributes: ['nombre_usuario', 'apellido_usuario'] },
                 includeEtiqueta
             ],
             order: orderOption,
@@ -67,14 +67,14 @@ export const mostrarDetalleFoto = async (req, res) => {
         
         const fotoEncontrada = await Publicacion.findByPk(idFoto, {
             include: [
-                { model: Usuario }, 
+                { model: Usuario, attributes: ['nombre_usuario', 'apellido_usuario'] }, 
                 { model: Imagen, as: 'imagenes' },
                 { model: Etiqueta, as: 'etiquetas' },
                 { model: Valoracion, as: 'valoraciones' },
                 { 
                     model: Comentarios, 
                      as: 'comentarios',
-                     include: [{ model: Usuario, as: 'Usuario', attributes: ['nombre_usuario'] }]
+                     include: [{ model: Usuario, as: 'Usuario', attributes: ['nombre_usuario', 'apellido_usuario'] }]
                 }
             ],
             order: [
@@ -644,7 +644,7 @@ export const meInteresa = async (req, res) => {
         const foto = await Publicacion.findByPk(publicacion_id);
 
         if (!foto || foto.usuario_id === interesado_id) {
-            return res.redirect('back'); // Si la foto no existe o es mía, reboto
+            return res.redirect(`/publicacion/${publicacion_id}`);
         }
 
         const autor_id = foto.usuario_id;
@@ -663,11 +663,79 @@ export const meInteresa = async (req, res) => {
                 publicacion_id: publicacion_id,
                 texto: "¡Hola! Me interesa esta imagen. ¿Podemos llegar a un acuerdo?"
             });
+            
+            await Notificacion.create({
+                usuario_id: autor_id, 
+                actor_id: interesado_id, 
+                publicacion_id: publicacion_id,
+                tipo: 'ME_INTERESA',
+                leida: false
+            });
         }
+        
         res.redirect('/mis-mensajes'); 
 
     } catch (error) {
         console.error("Error al enviar Me interesa:", error);
-        res.redirect('back');
+        const publicacion_id = req.params.id;
+        if (publicacion_id) {
+            return res.redirect(`/publicacion/${publicacion_id}`);
+        } else {
+            return res.redirect('/');
+        }
     }
 }
+
+export const mostrarEditar = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const usuarioId = req.session.usuario.id;
+        const publicacion = await Publicacion.findByPk(id);
+        if (!publicacion) return res.redirect('/');
+        if (publicacion.usuario_id !== usuarioId) return res.redirect(`/foto/${id}`);
+
+        //Bloquear si tiene denuncias
+        const cantidadDenuncias = await Denuncia.count({ where: { publicacion_id: id } });
+        if (cantidadDenuncias > 0) {
+            return res.redirect(`/foto/${id}`);
+        }
+
+        res.render('editarFoto', {
+            foto: publicacion,
+            usuario: req.session.usuario
+        });
+
+    } catch (error) {
+        console.error("Error al mostrar edición:", error);
+        res.redirect('/');
+    }
+};
+
+export const guardarEdicion = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titulo, descripcion } = req.body;
+        const usuarioId = req.session.usuario.id;
+
+        const publicacion = await Publicacion.findByPk(id);
+
+        if (!publicacion || publicacion.usuario_id !== usuarioId) {
+            return res.redirect('/');
+        }
+
+        const cantidadDenuncias = await Denuncia.count({ where: { publicacion_id: id } });
+        if (cantidadDenuncias > 0) {
+            return res.redirect(`/foto/${id}`);
+        }
+
+        publicacion.titulo = titulo;
+        publicacion.descripcion = descripcion;
+        await publicacion.save();
+
+        res.redirect(`/foto/${id}`);
+
+    } catch (error) {
+        console.error("Error al guardar edición:", error);
+        res.redirect(`/foto/${req.params.id}`);
+    }
+};

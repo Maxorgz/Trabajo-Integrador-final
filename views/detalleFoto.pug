@@ -110,7 +110,7 @@ block content
                         div(class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-md")
                           | #{comentario.Usuario.nombre_usuario.charAt(0).toUpperCase()}
                         div
-                          strong(class="text-gray-100 text-sm block")= comentario.Usuario.nombre_usuario
+                          strong(class="text-gray-100 text-sm block capitalize") #{comentario.Usuario.nombre_usuario} #{comentario.Usuario.apellido_usuario}
                           span(class="text-gray-400 text-[10px] uppercase font-bold tracking-wider") #{new Date(comentario.createdAt).toLocaleDateString('es-AR')}
                       
                       if usuario && usuario.id === comentario.usuario_id
@@ -139,7 +139,7 @@ block content
                   | #{foto.Usuario.nombre_usuario.charAt(0).toUpperCase()}
                 div
                   p(class="text-gray-400 text-xs uppercase tracking-widest font-semibold mb-1 group-hover:text-cyan-400 transition-colors duration-300 m-0") Publicado por
-                  p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm group-hover:text-cyan-300 transition-colors duration-300 mt-1") #{foto.Usuario.nombre_usuario}
+                  p(class="font-bold text-white text-lg m-0 leading-none drop-shadow-sm group-hover:text-cyan-300 transition-colors duration-300 mt-1") #{foto.Usuario ? foto.Usuario.nombre_usuario + ' ' + foto.Usuario.apellido_usuario : 'Desconocido'}
             else
               div(class="flex items-center gap-4 mb-6 pb-6 border-b border-white/10")
                 div(class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-xl shadow-lg")
@@ -192,7 +192,10 @@ block content
                     button(type="submit" class="px-5 py-3 bg-amber-500/20 hover:bg-amber-500 backdrop-blur-md text-amber-400 hover:text-white border border-amber-500/50 font-semibold rounded-xl transition-all shadow-lg") Votar
                 
                 else 
-                  a(href=`/publicacion/${foto.id}/editar` class="w-full flex justify-center py-3 bg-[#f39c12]/20 hover:bg-[#f39c12] backdrop-blur-md border border-[#f39c12]/50 text-[#f39c12] hover:text-white font-bold rounded-xl transition-all no-underline tracking-wide shadow-lg") ✏️ Editar Publicación
+                  if foto.denuncias && foto.denuncias.length > 0
+                    div(class="w-full flex justify-center py-3 bg-red-900/10 backdrop-blur-md border border-red-900/30 text-red-500/50 font-bold rounded-xl cursor-not-allowed shadow-lg") 🔒 Edición bloqueada por denuncias
+                  else
+                    a(href=`/publicacion/${foto.id}/editar` class="w-full flex justify-center py-3 bg-[#f39c12]/20 hover:bg-[#f39c12] backdrop-blur-md border border-[#f39c12]/50 text-[#f39c12] hover:text-white font-bold rounded-xl transition-all no-underline tracking-wide shadow-lg") ✏️ Editar Publicación
                 
                 form(action="/colecciones/guardar" method="POST" class="m-0 flex flex-col gap-2 mt-4 pt-4 border-t border-white/10")
                   input(type="hidden" name="publicacion_id" value=foto.id)
@@ -212,8 +215,6 @@ block content
                       div(class="w-full py-3 px-3 bg-black/30 border border-white/10 rounded-xl text-center")
                         a(href="/colecciones" class="text-cyan-400 hover:text-cyan-300 text-sm font-medium no-underline") Crea una coleccion para guardar fotos
                       
-                //else 
-                  a(href=`/publicacion/${foto.id}/editar` class="w-full flex justify-center py-3 bg-[#f39c12]/20 hover:bg-[#f39c12] backdrop-blur-md border border-[#f39c12]/50 text-[#f39c12] hover:text-white font-bold rounded-xl transition-all no-underline tracking-wide shadow-lg") ✏️ Editar Publicación
                 button(type="button" onclick="document.getElementById('modal-denuncia').classList.remove('hidden')" class="w-full mt-4 py-2 bg-red-900/20 hover:bg-red-600/80 border border-red-900/50 hover:border-red-500 text-red-500 hover:text-white font-bold rounded-xl transition-all shadow-lg text-sm") 🚨 Denunciar esta publicación
               
               else
